@@ -859,3 +859,65 @@ _ **Getting Started with App Engine** _
 - deploy the app, choosing the zone
 - go to app engine dashboard to see your app
 - disable the app using the app engine console settings
+
+**Developing, Deploying and Monitoring in the Cloud**
+
+_ **Developing, Deploying and Monitoring in the Cloud** _
+
+- Cloud Source Repositories are fully featured Git repositories hosted on GCP, they support collaborative development of cloud apps and include integration with stackdriver debugger
+  - They provide git version control to support collaborative develpoment of any application or service, including those that run on App Engine of Compute Engine
+  - If you are using the stackdriver debugger, you can use Cloud Source Repositories and related tools to view debugging info alongside your code at runtime
+  - They also provide a source viewer that you can use to browse and view repo files from within the GCP console
+  - Using these you can have any number of private Git repos which allows you to organise the code associated with your cloud project in whatever way works best for you.
+  - Google cloud diagnostics tools like the debugger and error reporting can use the code from your git repos to let you track down issues to specific errors without disrupting users
+  - If you have already got code in a Git repo, you can bring that into your cloud project and use it just like any other repo, including browsing and diagnostics
+- Cloud Functions, create single-purpose functions that respond to events without a server or runtime, it is written in javascript, executed in nodejs on gcp
+  - it is a lightweight event-based asynchronous compute system that allows you to to create small, single purpose functions that respond to cloud based events without runtime
+  - You can use these functions to construct applications from bite sized buissines logic.
+  - You can also use Cloud functions to connect and extend cloud services
+  - You are billed, to the nearest 100 milliseconds, only while your code is running.
+  - Cloud functions are written in javascript and execute in a managed nodejs environment on GCP
+  - Events from cloud storage and Cloud Pub/Sub can trigger Cloud Functions asynchronously, or you can use HTTP invocation for synchronous execution
+  - Cloud events are things that in your cloud environment, like changes to data in a database, files being added to a storage system, or a new vm being created
+  - Events occur whether or not you choose to respond to them, Creating a response to an a event is done with a trigger.
+  - A trigger is a declaration that you are interested in a certain event or set of events, you create triggers to capture events and act on them
+- Development manager is an infastructure managemnt service, using a yaml template to describe the environment, it provides repeat deployments
+  - development manager is an infastructure management service that automates the creation and management of your GCP resources for you
+  - Setting up your environment in GCP can entail many steps, which is why it is more  efficient to use a template.
+  - GCP provides a deployment manager to automate the creation and management of your GCP resources for you
+  - To use Deployment Manager, you can create a template file, using either the yaml file or python.
+    - The template file describes what you want the components of your environment to look like
+    - You can then give the file to the deployment manager , which figures out the actions needed to create your environment
+    - If you need to change your environment, you can edit the templatek and then tell your deployment manager to update
+- Stackdriver is GCP's tool for monitoring, logging, and diagnostics
+  - You cannot run an application without monitoring, it lets you figure out if the changes you made were good or bad
+  - It lets you respond with information rather than with paniv when your application is down
+  - Stackdriver gives you access to many different kinds of signals from your infastructure platforms.
+  - it gives you insight into your applications health, performance, and availability, so if issues occur you can fix them faster
+  - StackDriver offers capabilities in six areas
+    - monitoring (platform metrics, uptime/health checks, dashboards and alerts)
+    - Logging (platform logs, log search and filter, view and export)
+    - Trace (Latency reporting and sampling, Per-URL latency and statistics)
+    - Error Reporting (Error notifications, error dashboard)
+    - Debugger (debug applications)
+    - Profiler (Continuous profiling of CPU and memory consumption)
+  - Stackdriver Monitoring checks the endpoints of web applications and other internet-accessible services running on your cloud environment.
+    - you can configure uptime checks associated with URLs, groups or resources, such as instances and load balancers
+    - You can set up alerts on interesting criteria, like when health check results or uptimes fall into levels that need action
+    - You can use Monitoring with a lot of popular notification tools.
+    - and you can create dashboards to help you visualise the state of your application
+  - Stackdriver Loggin lets you view logs from you applications, and filter and search them
+    - Logging also lets you define metrics based on log contents that are incorporated into dashboards and alerts
+    - You can also export logs to BigQuery, Cloud Storage, and Cloud Pub/Sub
+  - Stackdriver Error Reporting tracks and groups the errors in your cloud applications, and it notifies you whenn new errors are detected
+  - Stackdriver Trace allows you to sample the latency of app engine applications and report per-URL statistics
+  - Stackdriver Debugger offers a less painful way of debugging
+    - it connects your applications production data to your source code, so you can inspect its state of your appplication at any code location in production
+    - this means you can view the application state without adding logging statements
+    - it works best when your applications source code is available, such as in cloud source repositories.
+  - Stackdriver Profiler is a statistical, low-overhead profiler that continously gathers CPU usage and memory-allocation information from production applications
+    - To profile an application is to look at its execution of a program and observe the patters between functions, how much CPU time and memory is used.
+    - Stackdriver Profiler attributes the information to your applications source code, helping you identify the parts of the application using the most resources
+    - the stackdriver profiler is in beta stage, and therefore is not covered by SLA or depreciation policies, and may be subject to backward-incompatible changes
+
+
