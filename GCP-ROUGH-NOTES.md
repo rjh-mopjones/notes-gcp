@@ -920,4 +920,100 @@ _ **Developing, Deploying and Monitoring in the Cloud** _
     - Stackdriver Profiler attributes the information to your applications source code, helping you identify the parts of the application using the most resources
     - the stackdriver profiler is in beta stage, and therefore is not covered by SLA or depreciation policies, and may be subject to backward-incompatible changes
 
+_ **Development in the cloud** _
+  - Cloud source properties keeps code private to a GCP project
+  - cloud source properties allows you to have any number of private git repos, allowing you to organise code
+  - it contains a source viewer where you can browse code in the repo
+  - cloud functions allows you to run basic code when new things happen
+  - they create single purpose functions in javascript and nodejs, you just pay when the functions run
+  - cloud functions can trigger on events 
+  - you declare triggers and attach javascript functions to these triggers
+  - some microservices can be implemented entirely in cloud functions
+  - cloud functions can also enhance already existing microservice structures
+
+_ **Infastructure as code** _
+  - setting up the environment can be done with templates
+  - deployment manager can be used to provide repeateable deployments
+  - this can be done in yaml or python
+  - deployment manager interprets the template to create and update the environment
+  - you can store these templates in cloud source repositories
+
+_ **Monitoring - Proactive instrumentation** _
+  - monitoring lets you figure out the changes you make are good or bad
+  - stackdriver is the tool for monitoring logging or diagnostics
+  - monitoring, logging, trace, error reporting and debugging are the key components
+  - monitoring allows you to configure uptime checks and allows you to set alerts
+  - monitoring can be used with a lot of popular loggin tools
+  - you can also set up dashboards with monitoring
+  - logging lets you view logs and filter and search on them
+  - you can also export logs to BigQuery, cloud storage 
+  - error reporting tracks and groups errors 
+  - it notifies you when new errors are created
+  - stackdriver trace has latency reporting and sampling
+  - you can get per-URL statistics
+  - Debugger can be used to inspect application at any code location
+  - it works best when the source code is avaliable in repositories
+
+_ **Lab - getting started with deployment manager and stackdriver** _
+  - activate cloud shell
+  - define env variable with GCP zones
+  - create deployment manager template with text editor
+  - create template and paste it in
+  - deployment requires you to declare zone and project ID
+  - use sed to sub in project ID
+  - use sed command to sub in preferred zone
+  - build deployment from template
+  - confirm status using gcloud command
+  - look at resulting vm
+  - go to compute engine vm instances page
+  - click on name to open details
+  - make change to template
+  - add command to startup script
+  - new command installs nginx
+  - update component
+  - now update is complete, look at details
+  - the startup script has changed
+  - put some cpu load on vm and monitor it
+  - log into vm
+  - use artifical command to make a cpu load
+  - return to GCP console and setup stackdriver monitoring
+  - confirm you want to create an account
+  - confirm you wish to monitor GCP project
+  - skip AWS setup
+  - no need to install stackdriver monitoring agent
+  - dont need to get reports by email
+  - launch monitoring
+  - continue with trial
+  - cpu util has increased sharply
+
+**Big Data and Machine Learning in the Cloud**
+
+_ **Big Data and Machine Learning in the Cloud** _
+
+- Google Cloud's Big data services are fully managed and scalable
+  - Cloud DataProc provides managed hadoop mapreduce, Spark, Pig and Hive service
+  - Cloud Dataflow provides stream and batch processing, unified and simplified piplines
+  - BigQuery is an analytics database allowing streaming of data at 100,000 rows per second
+  - Cloud pub/sub allows for scalable and flexible enterprise messaging
+  - Cloud datalab allows for interactive data exploration
+  - Cloud Big data solutions are integrated serverless platforms that provide data insights.
+  - Serverless means no compute instances are needed to run the jobs
+  - the services are fully managed, you only pay for what you consume
+  - the platform is fully integrated with GCP
+- Cloud Dataproc is a managed hadoop service, it lets you create cluster in less than 90 seconds and can scale when jobs are running
+  - Hadoop is an open source framework for big data, based on the mapreduce model.
+  - Mapreduce uses the map funciton that runs in parrallel across a data set and the reduce fuction builds a final result
+  - hadoop is usually a catch-all for hadoop itself and related projects like spark, pig, hive
+  - Cloud Dataproc is a fast, easy and managed way to run the Hadoop stack
+  - it will be built in 90s or less on top of compute engine vms that you control
+  - it is easily scalable and you can use the default config for the hadoop software or customise it
+- Cloud Dataproc is useful because you can easily migrate on-premises hadoop, quickly analyse data in cloud storage, use Spark and spark ML to run data analysis/ classification algorithms
+  - running on premises hadoop jobs require hardware investment, on cloud dataproc you only pay for what you use.
+  - you can save money by using preemptible compute engine instances for batch processing, you need to make sure the jobs can be restarted cleanly after termination though
+  - once the data is in a cluster, spark and spark sql can do data mining, and use Mlib to discover patterns through machine learning
+- 
+
+  
+
+
 
