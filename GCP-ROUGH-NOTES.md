@@ -1250,6 +1250,108 @@ _ **Big Data and Machine Learning in the Cloud** _
   - helps you identify keyt entities 
   - You can use it to make video content searchable and discoverable
 
-    
+_ **Google Cloud Big Data Platform** _
 
+- integrated serverless platform, you pay only for resources you consume
+- GCP data services work together
+- apache hadoop is a open source framework for big data based on the map reduce module
+- also encompasses apache spark pig and hive
+- dataproc is a fast easy managed way to run all hadoop 
+- will be built ontop of compute engine VMs
+- you can scale it up or down
+- running on prem jobs require capital investment
+- dataproc is pay per second
+- one minute minimum billing 
+- can save money by using preemtible batch processes, needs to be clean break around eighty percent cheaper
+- once data is in a cluster you can use spark and ML libraries to do data mining
 
+_ **Dataflow** _
+
+- cloud dataproc is great when you have data of known size and you know when the data will arrive
+- cloud dataflow is good when you don't know the data size and it comes in real time
+- it is a managed service, it lets you develop and execute a big range of data processing patterns, extract transform and load batch computation
+- there is no need to spin up a cluster or size instances, cloud data flow fully automates the management
+- cloud data flow frees you from operational tasks like resource management and performance management of what resources are requrired
+- each step of the pipeline is elastically scaled, there is no need to launch and manage a cluster, all resources are on demand
+- that reduces the need to worry about hotkeys when dispropertionately large chunks of input get mapped to the same cluster
+
+_ **BigQuery** _
+
+- Suppose instead of a dynamic pipeline your data needs to run more in the way of exploring a vast ocean, you can use bigquery
+- because theres no infastructure you can focus on analysing data
+- you can stream it into bigquery at 100k rows per second
+- once its there you can run super fast SQL queries against terabytes of data
+-  You can easily write and read data in BigQuery via cloud dataflow hadoop and spar
+- BigQuery is used by all types of orgs
+- it is available 99.9 percent service level agreement
+- it lets you specify the region where your data will be kept
+- BigQuery separates storage and computation, you pay for data storage separately from queries
+- you only pay for queries whilst they are running
+- If you share data it won't effect your cost or performance, people you share with pay for their own queries
+- When the age of your data reaches 90 days in BigQuery google automatically drops the price, automatic long storage data discount
+
+_ **Pub/Sub and Datalab** _
+
+- a messaging service when working with events in real time
+- Reliable scalable foundation for stream analytics
+- pub is short for publishers, sub is short for subscribers
+- great for decoupling systems as recieving messages doesn't have to be synchronous
+- at least once delivery, change some messages might be delivered more than once
+- on demand scalability
+- 1 mill messages per second and beyond
+- you choose the quota you want
+- builds on same tech google uses internally
+- important building block for applications where data arrives at high and unpredictable rates
+- If you're streaming data in cloud data flow it is a natural pairing with pub sub
+- it also works well with applications built on GCPs comput platforms
+- you can configure your subscribers to receive messages on a push pull basis
+- meaning subscribers can get notified when new messages arrive for them or they can check for new messages at intervals
+- it runs on a compute engine VM
+- to get started you specify the VM and what region it should run in when it launches
+- it presents an interactive python environment
+- it orchestres multiple GCP services automatically so you can focus on exploring your data, only paying for resources you use
+- no addition charge for datalab itself it is integrated with BigQuery compute engine
+
+_ **Google Cloud Machine Learning Platform** _
+
+- ML is a branch of AI its a way of solving problems without explicitly coding the solution
+- you can add innovative capabilities to your own applications
+- cloud machine learning platform provides modern ML services with pre-trained models and platform to generate your own tailored models
+- Can use tensorflow m an open source software library thats well suited for ML applications
+- GCP is an ideal place for tensorflow because machine learning models need lots of on demand compute resources and lots of training data
+- can also take advantage of tensor processing units, hardware devices designed to accelerate ML workloads with tensorflow
+- GCP makes them available with compute engine VMs
+- lets you build ML models that work on any type of data of any size
+- GCP also offers a wide range of ML APIs suited to speicifc uses
+- Cloud ML platform for use on unstructured or structured data
+- ML for image analytics
+- ML for language identification and translation
+
+_ **ML APIs** _
+
+- Cloud vision api enables developers to understand the content of an image
+  - quickly classifies images into categories
+  - detects objects in images and printed words
+  - powerful ML models in an easy to use API
+- Cloud speech api enables developers to transform audio to text in many languages
+- Cloud Natural language api offers natural language understanding technologies
+  - syntax analysis
+  - breaking into tokens
+  - figure out relationships between words
+- CLoud translation api provides a simple programmatic interface for translating an arbitrary string
+- Cloud Video intelligence API lets you annotate videos in a variety of formats
+
+_ **Getting Started with BigQuery** _
+
+- load into bigquery
+- loading data from cloud storage into BQ
+- Bigquery in side 
+- inside GCP project create new dataset
+- add table to dataset
+- give URL to CSV file
+- destination table name
+- tell BQ to automatically detect schema
+- Query using BQ web interface
+- paste in SQL query
+- browse results
+- can also run query using BQ command in cloud shell
