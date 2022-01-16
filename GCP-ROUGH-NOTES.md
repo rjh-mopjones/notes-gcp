@@ -1011,6 +1011,245 @@ _ **Big Data and Machine Learning in the Cloud** _
   - running on premises hadoop jobs require hardware investment, on cloud dataproc you only pay for what you use.
   - you can save money by using preemptible compute engine instances for batch processing, you need to make sure the jobs can be restarted cleanly after termination though
   - once the data is in a cluster, spark and spark sql can do data mining, and use Mlib to discover patterns through machine learning
-- 
+- Cloud dataflow offers managed data pipelines, processes data using Compute Engine instances, clusters are sixed for you with automated scaling, no instance provision is nrequired, you can write code once and get batch and streaming with a transform based programming model
+  - Cloud Dataflow is better than dataproc in instances where you have a datset of unknown size, or when you don't need to manage the cluster size yourself
+  - If the data shows up in realtime or if its of unpredictable size or rate then cloud dataflow is a good choice.
+  - Cloud dataflow is both a unified programming model and a managed service, and its lets you develop and execute a big range of data processing patterns
+    - extract transform and load
+    - batch computation
+    - continuous computation
+  - You use Dataflow to build data pipelines, and the same pipelines work for both batch and streaming data.
+  - Dataflow is a unified programming model and a managed service for developing and executing a wide range of data processing patterns including
+    - ETL
+    - batch computation
+    - continuous computation
+  - Cloud Dataflow frees you from operational tasks like resource management and performance optimization
+- Cloud Dataflow features
+  - Resource Management
+    - Cloud Dataflow fully automates management of required processing resource. No more spinning up instances by hand
+  - On Demand
+    - All resources are provided on demand, enabling you to scale to meet your business needs. No need to buy reserved compute instances
+  - Intelligent Work Scheduling
+    - Automated and optimixed work partitioning which can dynamically rebalance lagging work. No more changin down hot keys or pre processing input data
+  - Auto Scaling
+    - Horizontal auto scaling of worker resources to meet optimum throughput requirements results in better overall price to performance
+  - Unified Programming Model
+    - The Dataflow API enables you to express MapReduce like operations, powerful data windowing and fine grained correctness control regardless of data source
+  - Open Source
+    - Developers wishing to extend the Dataflow programming model caan fork and or submit pull requests on the Java-based Cloud Dataflow SDK. Dataflow pipelines can also run on alternate runtimes like Spark and Flink
+  - Monitoring
+    - Intergrated into the GCP console Dataflow provides stats such as pipline throughput and lag as well as consolidated worker log inspection
+  - Integreated
+    - Intergrates with Cloud Storage, Cloud Pub and Sub, Cloud Datastore, Cloud Bigtable and BigQuery for seamless data processing. This can be extended to interact with others sources and sinks like Apache Kafka and HDFS
+  - Reliable and Consistent Processing
+    - Cloud Dataflow provides built in support for fault tolerant execution that is consistent and correct regardless of data size, cluster size and processing pattern or pipelline complexity.
+ - Dataflow Pipeline
+  - Each step of the pipeline is elastically scaledm there is no need to launch and manage a cluster.
+  - Instead the service provides all resources on demand
+  - It has automated and optimised work partitioning built in which can dynamically rebalance lagging work
+  - That reduces the need to worry about hot keys 
+  - that is situations where disproportionately large chunks of you input get mapped to the same cluster
+ - Dataflow Uses, ETL pipelines, Data analysis, Orchestration, Integration
+  - People use Dataflow for a variety of use cases, it serves well as a general purpose extract transform and load tool
+  - Its use case as a data analysis engine comes in handy in events of
+    - Fraud Detection in financial services
+    - IOT analytics in manufacturing
+    - healthcare
+    - logistics
+    - clickstream
+    - point of scale
+    - segmentation analysis in retail
+  - Because those pipelines we saw can orchestrate multiple services, even external services
+  - It can be used in realtime applications such as personalising gaming user experiences
+- BigQuery is a fully managed data warehouse, provides near real time interactive analysis of massive datasets, Query using SQL syntax and no cluster maintenance required
+  - If instead of a dynamic pipeline you to do ad hoc SQL queries on a massive datasetlm that is what BQ is for, BigQuery is Googles fully managed petabyte scale low cost analytics data warehouse
+  - Big Query is NoOps, there is no infastructure to manage and you dont need a database admin, so you can focus on analysing data to find meaningful insights
+  - You can take advantage of our pay as you go model and use familiar SQL.
+  - BigQuery is a powerful big data analytics platform used all types of orgs
+  - BigQuery features
+    - Flexible Data ingestion
+      - Load you data from cloud storage or cloud datastore, or stream it into BQ at 100K rows per second to enable real time analysis of your data
+    - Global Availability
+      - You have the option to store your BQ data in european locations while continuing to benefit from a fully managed service, now with the option of geographic data control, without low level cluster maintenance
+    - Security and Permissions
+      - You have full control over who has access to the data stored in BQ.
+      - If you share datasets, doing so will not impact your cost or performance, those you share with pay for their own queries
+    - Cost Controls
+      - BQ provides cost control mechanisms that enable you to cap your daily costs at an amount that you choose
+    - Highly Available
+      - Transparent data replications in multiple geographies means that your data is available and durable even in the case of extreme failure modes
+    - Super Fast Performance
+      - Run super fast SQL queries against multiple terabytes of data in seconds, using the processing power of Google infastructure
+    - Fully Integrated
+      - in addition to SQL queries you can easily read and write data in BQ via Cloud Dataflow, Spark and Hadoop
+    - Connect with Google Products
+      - You can automatically export your data from Google Analytics Premium into BG and analyxe datasets stored in the google cloud storage, google drive and google sheets
+  - BigQuery can make, Create, Replace, Update and Delete changes to Databases subject to some limitations
+  - BigQuery runs on Googles high performance infastructure
+    - Compute and Storage are separated with a terabit network in between
+    - You only pay for storage and processing used
+    - automatic discount for long term data storage
+    - Its easy to get data into BigQuery, you can load from Cloud Storage or Cloud Datastore, or stream it into BigQuery at up to 100K rows per second
+    - BigQuery is used by all types of organisations, smaller orgs like BQs free monthly quotas, bigger orgs like its seamless scale and its avaliable 99pc service level agreement
+    - Long term storage pricing is an automatic discount for data residing in BQ for extended periods of time
+    - When the age of your data reaches 90 days in BigQuery google will automatically drop the price of storage from $0.02 per GB per month down to $0.01 per GB per month
+- Cloud Pub and Sub is scalable, reliable messaging
+  - It Supports many to many asynchronous messaging, application components make push/pull subscriptions to topics
+  - It Includes support for offline consumers 
+  - based on proven Google technologies
+  - Integrates with Cloud Dataflow for data processing pipelines
+  - It allows you to send and receive messages between independent applications.
+  - you can leverage the flexibility to decouple systems and components hosted on GCP or elsewhere
+  - By building on the same tech Google uses, Cloud Pub/Sub is designed to provide 'at least once' delivery at low latency with on demand scalability to 1M messages per second
+  - Cloud Pub/Sub features
+    - Highly Scalable
+      - Any customer can send up to 100k messages per second, by default and millions per second and beyond upon request
+    - Push and Pull Delivery
+      - Subscribers have flexible delivery options, whether they are accessible from the internet or behind a firewall
+    - Encryption
+      - Encryption of all message data on the wire and at rest provides data security and protection
+    - Replicated Storage
+      - Designed to provide 'at least once' message delivery by storing every message on multiple servers in multiple zones
+    - End to End acknowledgement
+      - Building reliable applications is easier with explicit application level acknowledgements
+    - Fan-Out
+      - Publish Messages to a topic once, and multiple subscribers reveive copies to support one-to-many or many-to-many communication patterns
+    - REST API
+      - Simple, stateless interface using JSON messages with API libraries in many programming languages
+   - Why Use Cloud Pub/Sub
+    - Building block for data ingestion in DataFlow, IoT, Marketing Analytics
+    - Foundation for DataFlow streaming
+    - Push Notification for cloud based applications
+    - Connect applications across GCP
+    - Cloud Pub/Sub builds on the same technology google uses interanlly
+    - its an important building block for applications where data arrives at high and unpredictable rates, like IOT systems
+    - if youre analysing streaming data, Cloud dataflow is a natural pairing with Pub/Sub.
+- Cloud Datalab offers interactive data exploration
+  - Interactive tool for large-scale data exploration, transformation, analysis and visualisation
+  - Integrated and open source, built on Jupyter
+  - For data science, an online lab notebook metaphor is a useful environment, because it feels natural to intersperse data analyses with comments about their results
+  - A popular open-source system for hosting those is Project Jupyter, letting you create and maintain web based notebooks containing python code, you can run that interactive and view the results
+  - Cloud Datalab lets you use Jupyter notebooks to explore, analyse and visualise data on GCP
+  - It runs in a compute engine virtual Machine
+  - To get started, you specify the virtual machine type you want and what region is should run in, when it launches it presents an interactive python environment thats ready to use
+  - it orchestrates multiple GCP services automatically, so you can focus on exploring your data.
+  - You only pay for the resources you use, theres no additional charge for Datalab itself
+  - Cloud Datalab features
+    - Integrated
+      - Cloud Datalab handles authentication and cloud computation out of the box and is integrated with BigQuery, Compute Engine and Cloud Storage.
+    - Multi-Language Support
+      - Cloud Datalab currently supports Python, Sql and Javascript (For BigQuery user-defined functions)
+    - Notebook Format
+      - Cloud Datalab combines code, documentation, results and visualisations together in an intuitive notebook format
+    - Pay per use Pricing
+      - Only pay for the cloud resources you use, the app engine application, BigQuery and any additional resources you decide to use, such as cloud storage
+    - Interactive Data Visualisation
+      - Use Google charts or matplotlib for easy visualisations 
+    - Collaborative
+      - Git based source control of notebooks with the option to sync with non-google source doe repositories like githubn and bitbucket
+    - Open Source
+      - Developers who want to extend cloud datalab can for and/or submit pull requests on the github hosted project
+    - Custom Deployment
+      - Specify your minimum VM requirements, the network host and more
+    - IPython Support
+      - Cloud Datalab is based on Jupyter (Formerly Ipython) so you can use a large number of existing packages for stats, machine learning etc. Learn from published notebooks and swap tips with a vibrant ipython community
+  - Why use cloud datalab
+    - Create and manage code, documentation, results and visualisations in an intuitive notebook format
+      - use google charts or matplotlib for easy visualtions
+    - Analyse data in BigQuery, Compute Engine, and Cloud Storage using Python, SQL and Javascript
+    - Easily deploy models to BigQuery
+    - Cloud Datalab is integrated with BigQuery, Compute Engine, and Cloud Storage so accessing your data doesnt run into authentication hassles
+    - You can visualise your data with google charts or matplotlib.
+    - You can attach a GPU to a cloud datalab instance for faster processing, this is in beta
+- Machine Learning APIs enable apps that see, hear and understand
+  - Machine learning is one branch of the field of AI
+  - Its a way of solving problems without expliciting coding the solution
+  - instead human codes build systems that improve themselves over time, through repeated exposure to sample data
+  - Major google application use machine learning 
+- Cloud Machine Learning Platform
+  - Open source tool to build and run neural network models
+    - Wide platform support, CPU or GPU, mobile, server or cloud
+  - Fully managed machine learning service
+    - Familiar notebook-based developer experience
+    - optimised for google infastructure, integrates with BigQuery and Cloud Storage
+  - Pre-trained machine learning models built by Google
+    - Speech, Vision, translate and Natural Language
+  - Cloud Machine Learning Platform provides modern machine learning services, with pre-trained models and a platform to generate you own tailored maodels
+  - As with other GCP products, theres a range of services that stretches from the highly general to the pre-customised
+  - Tensorflow is an open source software library thats exceptionall well suited for machine learning application like neural networks
+  - It was development by Google Brain for Googles internal use and then open sourced so the world can benefit
+  - GCP is an ideal place for tensorflow because ML models need lots of on demand compute resources and lots of training data.
+  - TensorFlow can also take advantage aof tensor processing units, which are hardware devices designed to accelerate machine learning workloads with tensorflow
+  - GCP makes them available in the cloud with Compute Engine virtual machines
+  - Each Cloud TPU provides up to 180 teraflops of performance and because you pay only for what you use.
+  - Suppose you want a more managed service, Google cloud machine learning engine lets you easily build machine learning models that work on any type or size of data
+  - Finally, if you just want to add ML capabilites to you application, without having to worry about the details of how they are provided
+  - Google Cloud also offers a range of ML APIs suited to specific purposes
+  - Why use the Cloud ML platform?
+    - It falls into two catagories based on the data, unstructured or structured
+    - Based on structure data, you can use ML for
+      - for various kinds of classification or regression tasks like
+      - customer churn analysts, product diagnostics and forecastiung
+      - it can be the heart of a recommendation engine, for content personalistation and cross-sells and up-sells
+      - You can use ML to detect anomalies, like fraud detection, sensor diagnostics or log metrics
+    - Based on unstructured data, you can use ML for
+      - image analystics, such as identifying damaged shipments, identifying styles and flaggin content.
+      - you can do text analystics like call center log analysis, language identification, topic classification and sentiment analysis
+    - In many of the most innovative applications for ML, several of these applications are combined.
+- Cloud Vision API
+  - Analyse images with a simple REST API
+  - Gain insight from images
+  - Detect inappropriate content
+  - analyse sentiment
+  - extract text
+  - Cloud Vision enables developers to understant the content of an image by encapsulating powerful ML models in an easy to use REST API
+  - It quickly classifies images into thousands of categories, detects objects in images and finds and reads printed words in images
+  - You can build metadata on you image catalog, moderate offensive content or enable new marketing scenarios useing image sentiment analysis
+  - analyse images uploaded in the request or integrate with your image storage on Cloud Storage
+- Cloud Speech API
+  - recognises over 80 languages and variants
+  - can return text in real time
+  - highly accurate, even in noisy environments
+  - access from any device
+  - allows developers to convert audio to text
+- Cloud Natural Language API
+  - Uses machine learning mdoels to reveal structure and meaning of text
+  - extract information about items mentioned in text documents, news articles and blog posts
+  - analyse text uploaded in request or integrate with cloud storage
+  - The cloud natural language API offers a variety of natural language understanding technologies to developers
+  - it can do syntax analysis, breaking down sentences supplies by you users into tokesns, identify nouns etc and figure out relations among words
+  - It can do entity recognition, parsing text and flag mentions of people, locations etc
+  - it can understand overall sentiment expressed in a block of text
+  - it can do this in multiple languages
+  - Cloud Natural Language API features
+    - Syntax Analysis
+      - Extract tokens and sentences, identify parts of speech and create dependency parse trees for each sentence
+    - entity recognition
+      - Identify entities and label by types
+    - Sentiment Analysis
+      - Understand the overall sentiment expressed in a block of text
+    - Multi-Language
+      - enables you to easily analyse text in multiple languages including english spanish and japanaese
+    - Integrated REST API
+      - Access via REST API. Text can be uploaded in the request or integrated with Cloud Storage
+- Cloud Translation API
+  - Translate arbitrary strings between thousands of language pairs
+  - programmatically detect a documents language
+  - support for dozens of languages
+  - cloud translation API provides a simple programmatic interface for translating a string into any supported language
+  - Translation API is highly responsive and dynamic
+  - Language detection is also available in cases where the source language is unknown
+  - Supports API Client libraries in Python, Java, Ruby, Objective C and more
+- Cloud Video Intelligence API
+  - Annotate the contents of videos
+  - detect scene changes
+  - flag inappropriate content
+  - support for a variety of video formats
+  - Allows developers to use google video analysis technology as part of their apps
+  - The REST API enables users to annotate videos stored in Google Cloud Storage with video and frame level contextual info
+  - helps you identify keyt entities 
+  - You can use it to make video content searchable and discoverable
 
-  
+    
+
+
