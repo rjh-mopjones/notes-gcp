@@ -1,0 +1,499 @@
+**Platform Fundamentals**
+
+**Virtual Networks**
+
+- google cloud consists of regions, points of presence or PoPs
+- A region is a specific geographical location where you can run your resources
+- PoPs are where googles network is connected to the rest of the internet
+- Google cloud can bring traffic closer to its peers because it operates an extensive network of interconnection points, reducing cost aswell
+
+_ **VPC Objects** _
+
+- you can connect GCP resources together in a Virtual Private Cloud
+- You can also set fine grained networking polices within GCP and on-prem or other public clouds
+- VPC is a comprehensive set of google managed networking objects
+  - Projects encompass every service you use including networks
+  - Networks come in three different flavours, default, auto mode and custom mode
+  - Subnetworks allow you to divide or segregate you envrionment
+  - Regions and zones represent googles data centers
+  - VPC provides IP addresses for internal and external use
+  - Routes and firewall rules
+
+_ **Projects and Networks** _
+
+- Projects are the key organizer of resources in GCP
+- A project associates objects and services with billing
+- Default quota for each project is 5 networks, you can  request additional
+- These networks do not have ip ranges, they are a construct of all of the individual ip addresses and services within that networ
+- GCP networks are global, you can have one network that exists anywhere in the world
+- inside a network you can segregate your resources with regional subnetworks
+- there are three VPC network types
+  - Default
+    - every project is provisioned with one with preset subnets and firewall rules
+    - subnet is allocated for each region with non overlapping CIDR blocks
+    - firewall rules that allow ingress traffic for ICMP, RDP,and SSH traffic from everywhere
+  - Auto 
+    - One subnet from each region is automatically created within it
+    - the default network is actually auto mode
+    - these automatically created subnets use a set of predefined IP ranges with /20 mask that can be expanded to /16
+    - All of these subnets fit within the 10.128.0.0/9 CIDR block
+    - Thereform as new GCP regions become available, new subnets in those regions are automatically added 
+  - Custom Mode
+    - no automatically made subnets
+    - you can complete control over its subnnets and ip ranges
+    - you decided which subnets to create, in regions that you choose 
+    - using IP ranges you specify within the RFC 1918 address space. These IP ranges cannot overlap between subnets of the same network
+  - You can convert auto to custom but not the other way around
+- Because VM instances within a VPC network can communicate privately on a global scale
+- a single VPN can securely connect your on-prem network to your GCP network
+- even when two VM are in separate regions, they leverage Google’s private network to communicate between each other and to an on-premises network through a VPN gateway.
+- This reduces cost and network management complexity. 
+
+_ **Subnetworks** _
+
+- Subnetworks work on a regional scale, and subnetworks can cross zones
+- even when two VMs are in different zones they can still communicate with each other using the same subnet IP address
+- this means a single firewall rule can be applied to both VMs, even when they are in different zones
+- Google Cloud VPCs let you increase the IP address space of any subnets without any workload shutdown or downtime
+- The new subnet must not overlap with other subnets in the same VPC network in any region
+- The subnet must stay inside the RFC 1918 address spaces
+- the new network range must be larger than the original, you cannot undo an expansion
+- Now, auto mode subnets start with a /20 IP range. They can be expanded to a /16 IP range, but no larger
+- Also  you can convert the auto mode subnetwork to a custom mode subnetwork to increase the IP range further
+- You should avoid creating large subnets
+- Overly large subnets are more likely to cause CIDR range collisions when using Multiple Network Interfaces and VPC Network Peering, or when configuring a VPN or other connections to an on-premises network
+- Do not scale your subnet beyond what you actually need
+
+_ **IP Adresses** _
+
+- VMs can have internal and external IP addresses
+- Internal IP addresses are assigned via DHCP internally
+- Every VM that starts up and any service that depends on virtual machines gets an internal IP address
+- The symbolic name of a VM is registered with an internal DNS service that translates the name to the internal IP address
+- DNS is scoped to the network, so it can translate web URLs and VM names of hosts in the same network, but it can't translate host names from VMs in a different network
+- External IP addresses can also be assigned
+- It can be assigned from a pool or you can make it static
+- you are charged at a higher rate for static IPs that aren't in use
+- external IPs are mapped to internal IPs transparently by VPC
+- Each instance has a hostname that can be resolved to an internal IP address. This hostname is the same as the instance name
+- There is also an internal fully qualified domain name, or FQDN
+- If you delete and recreate an instance, the internal IP address can change. This change can disrupt connections
+- However, the DNS name always points to a specific instance, no matter what the internal IP address is.
+- Each instance has a metadata server that also acts as a DNS resolver for that instance
+- The metadata server handles all DNS queries for local network resources and routes all other queries to Google's public DNS servers for public name resolution
+- an instance is not aware of any external IP address assigned to it. Instead, the network stores a lookup table that matches external IP addresses with the internal IP addresses of the relevant instances
+- Instances with external IP addresses can allow connections from hosts outside of the project.
+- Users can do this with the external IP address
+- Public DNS records pointing to instances are not published automatically; however, admins can publish these using existing DNS servers.
+- Domain name servers can be hosted on GCP, using Cloud DNS
+- Cloud DNS is a scalable, reliable, and managed authoritative Domain Name System, or DNS, service running on the same infrastructure as Google
+- Cloud DNS translates requests for domain names like google.com into IP addresses
+- Cloud DNS lets you create and update millions of DNS records without the burden of managing your own DNS servers and software with a simple API
+- Another networking feature of GCP is Alias IP Ranges. 
+- Alias IP Ranges let you assign a range of internal IP addresses as an alias to a virtual machine's network interface.
+- This is useful if you have multiple services running on a VM, and you want to assign a different IP address to each service
+- In essence, you can configure multiple IP addresses, representing containers or applications hosted in a VM, without having to define a separate network interface. 
+- You just draw the alias IP range from the local subnet's primary or secondary CIDR ranges.
+
+_ **Routes and Firewall Rules** _
+
+- By default, every network has routes that let instances in a network send traffic directly to each other, even across subnets
+- In addition, every network has a default route that directs packets to destinations that are outside the network
+- These routes can cover most of the needs, but you can also override them with custom routes
+- creating a route does not ensure that your packets will be received by the specified next hop. Firewall rules must also allow the packet. 
+- Default network has pre-configured firewall rules that allow all instances in the network to talk to each other
+- Manual create networks do not have such rules, you must create them
+- Routes match packets by destination IP address. However, no traffic will flow without also matching a firewall rule
+- A route is created when a network is created, enabling traffic delivery from “anywhere.”
+- Also, a route is created when a subnet is created, this is what enables VMs on the same network to communicate
+- Each route in the Routes collection may apply to one or more instances
+- A route applies to an instance if the network and instance tags match
+- If the network matches and there are no instance tags specified, the route applies to all instances in that network.
+- Compute Engine then uses the Routes collection to create individual read-only routing tables for each instance
+- GCP firewall rules protect your virtual machine instances from unapproved connections, both inbound and outbound, known as ingress and egress
+- Essentially, every VPC network functions as a distributed firewall
+- Although firewall rules are applied to the network as a whole, connections are allowed or denied at the instance level
+- You can think of the firewall as existing not only between your instances and other networks, but between individual instances within the same network
+- GCP firewall rules are stateful. This means that if a connection is allowed between a source and a target or a target and a destination, all subsequent traffic in either
+direction will be allowed
+- In other words, firewall rules allow bidirectional communication once a session is established
+- Also, if for some reason, all firewall rules in a network are deleted, there is still an implied "Deny all" ingress rule and an implied "Allow all" egress rule for the network.
+- You can express your desired firewall configuration as a set of firewall rules.  Conceptually, a firewall rule is composed of the following parameters:
+  - Direction of the rule
+    -  Inbound connections are matched against ingress rules only, and outbound connections are matched against egress rules only
+  - The Source of the connection, or the Destination of the connection for egress packets
+  - Protocol and Port of the connection
+    - where any rule can be restricted to apply to specific protocols only or specific combinations of protocols and ports only
+  - The Action of the rule
+    - which is to allow or deny packets that match the direction, protocol, port, and source or destination of the rule
+  - The Priority of the rule
+    - which governs the order in which rules are evaluated.  The first matching rule is applied
+  - The Rule Assignment
+    - By default, all rules are assigned to all instances, but you can assign certain rules to certain instances only
+- Egress firewall rules control outgoing connections originated inside your GCP network
+- Egress allow rules allow outbound connections that match specific protocol, ports, and IP addresses
+- Egress deny rules prevent instances from initiating connections that match non-permitted port, protocol, and IP range combinations
+- For egress firewall rules, destinations to which a rule applies may be specified using IP CIDR ranges
+- Specifically, you can use destination ranges to protect from undesired connections initiated by a VM instance toward an external host, as shown on the left
+- You can also use destination ranges to prevent undesired connections from internal VM instances to a specific GCP CIDR range
+- Ingress firewall rules protect against incoming connections to the instance from any source
+- Ingress allow rules allow specific protocol, ports, and IP addresses to connect in.
+- The firewall prevents instances from receiving connections on non-permitted ports or protocols
+- Rules can be restricted to only affect particular sources.
+- Source CIDR ranges can be used to protect an instance from undesired connections coming either from external networks or from GCP IP ranges
+
+_ **Pricing** _
+
+- ingress or traffic coming into GCP’s network is not charged, unless there is a resource such as a load balancer that is processing ingress traffic
+- Responses to requests count as egress and are charged.
+- Egress traffic to the same zone is not charged, as long as that egress is through the internal IP address of an instance
+- Also, egress traffic to Google products, like YouTube, Maps, Drive, or traffic to a different GCP service within the same region is not charged for
+- However, there is a charge for egress between zones in the same region, egress within a zone if the traffic is through the external IP address of an instance, and egress between regions
+- As for the difference in egress traffic to the same zone, Compute Engine cannot determine the zone of a virtual machine through the external IP address
+- Therefore, this traffic is treated like egress between zones in the same region
+- you are charged for static and ephemeral external IP addresses
+- You can use the pricing calculator
+
+_ **Common Network Designs** _
+
+- Increase Availability with Multiple Zones
+  - If your application needs increased availability, you can place two virtual machines into multiple zones but within the same subnetwork
+  - Using a single subnetwork allows you to create a firewall rule against the subnetwork 10.2.0.0/16. 
+  - Therefore, by allocating VMs on a single subnet to separate zones, you get improved availability without additional security complexity
+  - A regional managed instance group contains instances from multiple zones across the same region, which provides increased availability
+- Globalization with multiple regions
+  - In the previous design we placed resources in different zones in a single region, which provides isolation from many types of infrastructure, hardware, and software failures
+  - Putting Resources in different regions provides an even higher degree of failure independence
+  - This allows you to design robust systems with resources spread across different failure domains
+  - When using a global load balancer, like the HTTP load balancer, you can route traffic to the region that is closest to the user
+  - This can result in better latency for users and lower network traffic costs for your project.
+- Cloud NAT provides internet access to private instances
+  - As a general security best practice it is recommened using only assigning internal IP addresses to you VM instances wherever possible
+  - Cloud NAT is Google’s managed network address translation service
+  - It lets you provision your application instances without public IP addresses, while also allowing them to access the internet in a controlled and efficient manner
+  - This means your private instances can access the internet for updates, patching, configuration management, and more
+  - Cloud NAT enables two private instances to access an update server on the internet, which is referred to as outbound NAT
+  - However, Cloud NAT does not implement inbound NAT
+  - hosts outside your VPC network cannot directly access any of the private instances behind the Cloud NAT gateway
+  - This helps you keep your VPC networks isolated and secure
+- Private Google Access to Google APIs and services
+  - Similarly, you should enable Private Google Access to allow VM instances that only have internal IP addresses to reach the external IP addresses of Google APIs and services
+  - For example, if your private VM instance needs to access a Cloud Storage bucket, you need to enable Private Google Access.
+  - You enable Private Google Access on a subnet-by-subnet basis. As you can see in this diagram, subnet-a has Private Google Access enabled, and subnet-b has it disabled
+  - This allows VM A1 to access Google APIs and services, even though it has no external IP address. 
+  - Private Google Access has no effect on instances that have external IP addresses.  That’s why VMs A2 and B2 can access Google APIs and services.
+  - The only VM that can’t access those APIs and services is VM B1
+
+**Virtual Machines**
+
+ - VMs are the most common infastructure component, in GCP they are provided by Compute Engine
+ - VMs consists of a virtual CPU, some amount of memory, disk storage, and an IP address
+ - Compute Engine is GCP’s service to create VMs; it is very flexible and offers many options, including some that can't exist in physical hardware
+ - EG, a micro VM shares a CPU with other virtual machines, so you can get a VM with less capacity at a lower cost
+
+_ **Compute Engine** _
+
+ - there is a spectrum of different options in GCP for compute and processing
+ - Compute Engine gives you the utmost in flexibility: run whatever language you want—it's your virtual machine. This is purely an infrastructure as a service or IaaS model.
+ - The primary work case of Compute Engine is any general workload, especially an enterprise application that was designed to run on a server infrastructure
+ - Other services, like Google Kubernetes Engine, which consists of containerized workloads, may not be as easily transferable as what you’re used to from on-premises.
+ - Compute Engine at its heart, it's physical servers that you're used to, running inside the GCP environment, 
+ - Both predefined and custom machine types allow you to choose how much memory and how much CPU you want. You choose the type of disk you want, whether you want to just use standard hard drives, SSDs, local SSDs, or a mix
+ - You can even configure the networking interfaces and run a combination of Linux and Windows machines.
+ - Your choice of CPU will affect your network throughput. Specifically, your network will scale at 2 Gbits per second for each CPU core, except for instances with 2 or 4 CPUs which receive up to 10 Gbits per second of bandwidth
+ - As of this recording there is a theoretical maximum throughput of 32 Gbits per second for an instance with 16 or more CPUs and a 100 Gbits per second maximum throughput for specific instances that have T4 or V100 GPUs attached
+ - Similar to on-prem On Compute Engine, each virtual CPU (or vCPU) is implemented as a single hardware hyper-thread on one of the available CPU Platforms
+ - For storage, there are three options
+   - SSDs
+     - Designed to give you a higher number of IOPS per dollar versus standard disks, which will give you a higher amount of capacity for your dollar
+   - Local SSDs 
+     - Lower latency than SSD persistent disks, because they are attached to the physical hardware
+     - However, the data that you store on local SSDs persists only until you stop or delete the instance
+     - Typically, a local SSD is used as a swap disk, just like you would do if you want to create a ramdisk, but if you need more capacity, you can store those on a local SSD
+     - You can create instances with up to eight separate 375-GB local SSD partitions for a total of 3 TB of local SSD space for each instance
+   - Standard
+     - Standard and non-local SSD disks can be sized up to 257 TB for each instance. The performance of these disks scales with each GB of space allocated.
+ - For Networking we can have different types of networks and created firewall rules using IP addresses and network tags
+   -  you can do regional HTTPS load balancing and network load balancing. 
+   -  This doesn’t require any pre-warming because a load balancer isn't a hardware device that needs to analyze your traffic
+   - A load balancer is essentially a set of traffic engineering rules that are coming into the Google network, and VPC is applying your rules destined for your IP address subnet range
+ - For accessing a VM, the creator of an instance has full root privileges on that instance
+ - On a Linux instance, the creator has SSH capability and can use the GCP Console to grant SSH capability to other users.
+ - On a Windows instance, the creator can use the GCP Console to generate a username and password
+   - After that, anyone who knows the username and password can connect to the instance using a Remote Desktop Protocol, or RDP, client.
+ - When you define all the properties of an instance and click Create, the instance enters the provisioning state
+   - Here the resources such as CPU, memory, and disks are being reserved for the instance, but the instance itself isn’t running yet.
+ - Next, the instance moves to the staging state where resources have been acquired and the instance is prepared for launch
+   - Specifically, in this state, Compute Engine is adding IP addresses, booting up the system image, and booting up the system
+ - After the instance starts running, it will go through pre-configured startup scripts and enable SSH or RDP access. 
+   - Now, you can do several things while your instance is running
+   - you can live migrate your virtual machine to another host in the same zone instead of requiring your instance to be rebooted
+   - This allows GCP to perform maintenance that is integral to keeping the infrastructure protected and reliable, without interrupting any of your VMs
+   - While your instance is running, you can also move your VM to a different zone, 
+   - Take a snapshot of the VM’s persistent disk, export the system image, or reconfigure metadata
+ - Some actions require you to stop your virtual machine; for example, if you want to upgrade your machine by adding more CPU.
+   - When the instance enters this state, it will go through pre-configured shutdown scripts and end in the terminated state
+   - From this state, you can choose to either restart the instance, which would bring it back to its provisioning state, or delete it.
+ - You also have the option to reset a VM, which is similar to pressing the reset button on your computer
+   - This action wipes the memory contents of the machine and resets the virtual machine to its initial state
+   - The instance remains in the running state through the reset
+ - There are different ways you can change a VM state from running. 
+   - Some methods involve the GCP Console and the gcloud command, while others are performed from the OS, such as for reboot and shutdown.
+ - It’s important to know that if you are restarting, rebooting, stopping, or even deleting an instance, the shutdown process will take about 90 sec
+ - For a preemptible VM, if the instance does not stop after 30 seconds, Compute Engine sends an ACPI G3 Mechanical Off signal to the operating system
+   - Remember that when writing shutdown scripts for preemptible VMs.
+ - Compute Engine can live migrate your virtual machine to another host due to a maintenance event to prevent your applications from experiencing disruptions
+   - A VM’s availability policy determines how the instance behaves in such an event.
+   - The default maintenance behavior for instances is to live migrate, but you can change the behavior to terminate your instance during maintenance events instead.
+   - If your VM is terminated due to a crash or other maintenance event, your instance automatically restarts by default, but this can also be changed.
+   - These availability policies can be configured both during the instance creation and while an instance is running by configuring the Automatic restart and On host maintenance options.
+ - When a VM is terminated, you do not pay for memory and CPU resources
+   - However, you are charged for any attached disks and reserved IP addresses
+   - In the terminated state, you can perform any of the actions listed here, such as changing the machine type, but you cannot change the image of a stopped VM.
+
+
+_ **Compute Options (vCPU and Memory)** _
+
+ - You have three options for creating and configuring a VM
+   - GCP Console
+   - Cloud Shell command line
+   - RESTful API
+ - If you’d like to automate and process very complex configurations, you might want to programmatically configure these through the RESTful API by defining all the different options for your environment.
+ - If you plan on using the command line or RESTful API, I recommend that you first configure the instance through the GCP Console and then ask Compute Engine for the equivalent REST request or command line
+ - This way you avoid any typos and get dropdown lists of all the available CPU and memory options
+ - Machine Types
+ - A machine type specifies a particular collection of virtualized hardware resources available to a VM instance, including the system memory size, vCPU count, and maximum persistent disk capability
+   - GCP offers several machine types that can be grouped into 2 categories
+     - Predefined machine types
+       - These have a fixed collection of resources, are managed by Compute Engine and are available in multiple different classes
+       - Each class has a predefined ratio of GB of memory per vCPU. These are the
+         - Standard machine types
+         - High-memory machine types
+         - High-CPU machine types
+         - Memory-optimized machine types
+         - Compute-optimized machine types
+         - Shared-core machine types
+     - Custom machine types
+       - These let you specify the number of vCPUs and the amount of memory for your instance.
+   - Standard Machine Types 
+     - Standard machine types are suitable for tasks that have a balance of CPU and memory needs.  Standard machine types have 3.75 GB of memory per vCPU
+     - The vCPU configurations come in different intervals from 1 vCPU all the way to 96 vCPUs
+     -  Each of these machines supports a maximum of 128 persistent disks with a total persistent disk size of 257 TB, 
+       - which is also the case for the High-memory, High-CPU, Memory-optimized, and Compute-optimized machine types
+   - High Memory Machine types
+     - High-memory machine types are ideal for tasks that require more memory relative to vCPUs
+     - High-memory machine types have 6.50 GB of system memory per vCPU.
+     - Similarly to the standard machine types, the vCPU configurations come in different intervals from 2 vCPUs all the way to 96 vCPUs
+   - High-CPU machine types
+     - High-CPU machine types are ideal for tasks that require more vCPUs relative to memory.
+     - High-CPU machine types have 0.90 GB of memory per vCPU.
+   - Memory-Optimized machine types
+     - Memory-optimized machine types are ideal for tasks that require intensive use of memory, with higher memory to vCPU ratios than high-memory machine types
+     - These machines types are perfectly suited for in-memory databases and in-memory analytics 
+     - Memory-Optimized machine types 
+   - Compute-Optimized machine types
+     - Compute-optimized machine types are ideal for compute-intensive workloads
+     - These machine types offer the highest performance per core on Compute Engine
+     - Built on the latest-generation Intel Scalable Processors (the Cascade Lake), C2 machine types offer up to 3.8 Ghz sustained all-core turbo 
+     - and provide full transparency into the architecture of the underlying server platforms, enabling advanced performance tuning.
+     - C2 machine types offer much more computing power, run on a newer platform, and are generally more robust for compute-intensive workloads than the N1 high-CPU machine.
+   - Shared-Core machine types
+     - Shared-core machine types provide one vCPU that is allowed to run for a portion of the time on a single hardware hyper-thread on the host CPU running your instance
+     - Shared-core instances can be more cost-effective for running small, non-resource-intensive applications than other machine types.
+     - There are only Two Shared-core machine types
+       - f1-micro
+       - g1-small
+     - f1-micro machine types offer bursting capabilities that allow instances to use additional physical CPU for short periods of time
+     - Bursting happens automatically when your instance requires more physical CPU than originally allocated
+     - During these spikes, your instance will opportunistically take advantage of available physical CPU in bursts
+     - Note that bursts are not permanent and are only possible periodically.
+   - Creating Custom Machine Types
+     - If none of the predefined machine types match your needs, you can independently specify the number of vCPUs and the amount of memory for your instance
+     - Custom machine types are ideal for the following scenarios
+       - When you have workloads that are not a good fit for the predefined machine types that are available to you.
+       - Or when you have workloads that require more processing power or more memory
+       - but don't need all of the upgrades that are provided by the next larger predefined machine type
+     - It costs slightly more to use a custom machine type than an equivalent predefined machine type
+     - there are still some limitations in the amount of memory and vCPUs you can select
+       - Only machine types with 1 vCPU or an even number of vCPUs can be created.
+       - Memory must be between 0.9 GB and 6.5 GB per vCPU (by default).
+       - The total memory of the instance must be a multiple of 256 MB
+     - By default, a custom machine can have up to 6.5 GB of memory per vCPU. However, this might not be enough memory for your workload
+     - At an additional cost, you can get more memory per vCPU beyond the 6.5 GB limit. This is referred to as extended memory
+ - Choosing Region and Zone 
+   - The first thing you want to consider when choosing a region and zone is the geographical location in which you want to run your resources.
+   - Each zone supports a combination of Ivy Bridge, Sandy Bridge, Haswell, Broadwell, and Skylake platforms
+   - When you create an instance in the zone, your instance will use the default processor supported in that zone
+   - For example, if you create an instance in the us-central1-a zone, your instance will use a Sandy Bridge processor
+ - Pricing
+   - GCP offers a variety of different options to keep the prices low for Compute Engine resources
+   - All vCPUs, GPUs, and GB of memory are charged a minimum of 1 minute
+     - For example, if you run your virtual machine for 30 seconds, you will be billed for 1 minute of usage
+     - After 1 minute, instances are charged in 1-second increments.
+   - Compute Engine uses a resource-based pricing model, each vCPU and each GB of memory on Compute Engine is billed separately rather than as part of a single machine type
+   - You still create instances using predefined machine types, but your bill reports them as individual vCPUs and memory used.
+   - There are several discounts available but the discount types cannot be combined:
+     - Resource-based pricing allows Compute Engine to apply sustained use discounts 
+       - to all of your predefined machine type usage in a region collectively rather than to individual machine types
+     - If your workload is stable and predictable, you can purchase a specific amount of vCPUs and memory for a discount
+       - in return for committing to a usage term of 1 year or 3 years. 
+       - The discount is up to 57% for most machine types or custom machine types. The discount is up to 70% for memory-optimized machine types.
+     - A preemptible VM is an instance that you can create and run at a much lower price than normal instances
+       - However, Compute Engine might terminate (or preempt) these instances if it requires access to those resources for other tasks
+       - Preemptible instances are excess Compute Engine capacity so their availability varies with usage.
+   - The ability to customize the amount of memory and CPU through custom machine types allows for further pricing customization.
+   - Speaking of sizing your machine, Compute Engine provides VM sizing recommendations to help you optimize the resource use of your virtual machine instances.
+   - When you create a new instance, recommendations for the new instance will appear 24 hours after the instance has been created.
+   - Sustained use Discounts
+     - Sustained use discounts are automatic discounts for running specific Compute Engine resources (vCPUs, memory, GPU devices) for significant portion of the billing month.
+     - EG when you run one of these resources for more than 25% of a month, Compute Engine automatically gives you a discount for every extra minute you use for that instance
+     - The discount increases with usage, and you can get up to a 30% net discount for instances that run the entire month. 
+     - if you use a virtual machine for 50% of the month, you get an effective discount of 10%
+     - If you use it for 75% of the month, you get an effective discount of 20%
+     - If you use it for 100% of the month, you get an effective discount of 30%.
+     - You can also use the GCP Pricing Calculator to estimate your sustained use discount for any arbitrary workload.
+   - Compute Engine calculates sustained use discounts based on vCPU and memory usage across each region and separately for each of the following categories
+     - Predefined machine types
+     - Custom machine type
+   - See whether you can make your application function completely on preemptible VMs, because an 80-percent discount is a significant investment in your application
+   - these VMs might be preempted at any time, and there is no charge if that happens within the first minute
+   - Also, preemptible VMs are only going to live for up to 24 hours, and you only get a 30-second notification before the machine is preempted
+   - there are no live migrations nor automatic restarts in preemptible VMs, but you can actually create monitoring and load balancers that can start up new preemptible VMs 
+   - In other words, there are external ways to keep restarting preemptible VMs if you need to
+   - A major use case for preemptible VMs is batch processing job. If some of those instances terminate during processing, the job slows but does not completely stop
+   - preemptibles complete the batch processing tasks without placing workload on existing instances, without requiring to pay full price for additional normal instances.
+ - Sole-tenant nodes physically isolate workloads
+   - If you have workloads that require physical isolation from virtual machines in order to meet compliance requirements, you want to consider sole-tenant nodes
+   - A sole-tenant node is a physical Compute Engine server that is dedicated to hosting VM instances only for your specific project. 
+   - Use sole-tenant nodes to keep your instances physically separated from instances in other projects
+     - or to group your instances together on the same host hardware
+     -  for example if you have a payment processing workload that needs to be isolated to meet compliance requirements.
+   - A sole tenant node also has multiple VM instances, but they all can belong to the same project
+   - As of this recording, the only available node type can accommodate VM instances up to 96 vCPUs and 624 GB of memory
+   - You can also fill the node with multiple smaller VM instances of various sizes, including custom machine types and instances with extended memory
+   - Also, if you have existing operating system licenses 
+     - you can bring them to Compute Engine using sole-tenant nodes while minimizing physical core usage with the in-place restart feature
+ - Shielded VMs offer verifiable integrity
+   - Another compute option is to create shielded VMs
+   - Shielded VMs offer verifiable integrity of your VM instances, you can be confident your instances haven't been compromised by boot or kernel-level malware or rootkits
+   - Shielded VM's verifiable integrity is achieved through the use of Secure Boot, virtual trusted platform module or vTPM-enabled Measured Boot, and integrity monitoring
+   - Shielded VMs is the first offering in the Shielded Cloud initiative.
+   - Shielded Cloud initiative provides a secure foundation for all of GCP by integrity and offering features, like vTPM shielding/sealing, preventing data exfiltration.
+
+_ **Images** _
+
+ - When creating a virtual machine, you can choose the boot disk image
+ - This image includes the boot loader, the operating system, the file system structure, any pre-configured software, and any other customizations.
+ - You can select either a public or custom image.
+ - you can choose from both Linux and Windows images. Some of these images are premium images, as indicated in parentheses with a p
+ - These images will have per-second charges after a 1-minute minimum, with the exception of SQL Server images, which are charged per minute after a 10-minute minimum
+ - Premium image prices vary with the machine type. However, these prices are global and do not vary by region or zone.
+ - You can also use custom images. For example, you can create and use a custom image by pre-installing software that's been authorized for your particular organization.
+ - You also have the option of importing images from your own premises or workstation, or from another cloud provider.
+   - This is a no-cost service that is as simple as installing an agent, and I highly recommend that you look at it. 
+   - You can also share custom images with anybody in your project or among other projects, too.
+
+_ **Disk Options** _
+
+ - At this point you've chosen an operating system, but that operating system is going to be included as part of some kind of disk
+ - Every single VM comes with a single root persistent disk, because you're choosing a base image to have that loaded on.
+ - This image is bootable in that you can attach it to a VM and boot from it, and it is durable in that it can survive if the VM terminates. 
+ - To have a boot disk survive a VM deletion, you need to disable the “Delete boot disk when instance is deleted” option in the instance’s properties.
+ - Persistent Disks
+   - That means it's going to be attached to the VM through the network interface
+   - Even though it's persistent, it's not physically attached to the machine.
+   - This separation of disk and compute allows the disk to survive if the VM terminates
+   - You can also perform snapshots of these disks, which are incremental backups that we’ll discuss later.
+   - The choice between HDD and SSD disks comes down to cost and performance
+   - Another cool feature of persistent disks is that you can dynamically resize them, even while they are running and attached to a VM
+   - You can also attach a disk in read-only mode to multiple VMs.
+   - This allows you to share static data between multiple instances, which is cheaper than replicating your data to unique disks for individual instances.
+   - Zonal persistent disks offer efficient, reliable block storage
+   - Regional persistent disks provide active-active disk replication across two zones in the same region
+   - Regional persistent disks deliver durable storage that is synchronously replicated across zones a
+     - are a great option for high-performance databases and enterprise applications that also require high availability.
+   - By default, Compute Engine encrypts all data at rest.
+   - GCP handles and manages this encryption for you without any additional actions on your part
+   - However, if you wanted to control and manage this encryption yourself, you can either use Cloud Key Management Service to create and manage key encryption keys
+ - Local SSDs
+   - local SSDs are different from persistent disks in that they are physically attached to the virtual machine.
+   - Therefore, these disks are ephemeral but provide very high IOPS
+   - Currently, you can attach up to 8 local SSD disks with 375 GB each, resulting in a total of 3 TB
+   - Data on these disks will survive a reset but not a VM stop or terminate, because these disks can’t be reattached to a different VM.
+ - RAM Disk
+   - You can simply use tmpfs if you want to store data in memory.
+   -  This will be the fastest type of performance available if you need small data structures
+   - recommend a high-memory virtual machine if you need to take advantage of such features, along with a persistent disk to back up the RAM disk data.
+ - Summary of Disk options
+   - Persistent disks can be rebooted and snapshotted, but local SSDs and RAM disks are ephemeral.
+   - recommend choosing a persistent HDD disk when you don't need performance but just need capacity
+   - If you have high performance needs, start looking at the SSD options
+   - The persistent disks offer data redundancy because the data on each persistent disk is distributed across several physical disks
+   - Local SSDs provide even higher performance, but without the data redundancy.
+   - Finally, RAM disks are very volatile but they provide the highest performance.
+ - Maximum Persistent Disks
+   - Just as there is a limit on how many Local SSDs you can attach to a VM, there is also a limit on how many persistent disks you can attach to a VM
+   - As illustrated in this table, this limit depends on the machine type
+   - For the Shared-core machine type, you can attach up to 16 disks. 
+   - For the Standard, High Memory, High-CPU, Memory-optimized, and Compute-optimized machine types, you can attach up to 128 disks
+   - So you can create massive amounts of capacity for a single host.
+   -  throughput also shares the same bandwidth with Disk IO. 
+     - So if you plan on having a large amount of Disk IO throughput, it will also compete with any network egress or ingress throughput. 
+     - remember that, especially if you will be increasing the number of drives attached to a virtual machine
+ - Persistent Disk Management Differences
+   - There are many differences between a physical hard disk in a computer and a persistent disk, which is essentially a virtual networked device.
+   - First of all, if you remember with normal computer hardware disks, you have to partition them
+   - Essentially, you have a drive and you’re carving up a section for the operating system to get its own capacity
+   - If you want to grow it, you have to repartition, and if you want to make changes you might even have to reformat.
+   - If you want redundancy, you might create a redundant disk array, and if you want encryption, you need to encrypt files before writing them to the disk.
+   - With cloud persistent disks, things are very different because all that management is handled for you on the backend.
+   - You can simply grow disks and resize the file system because disks are virtual networked devices.
+   - Redundancy and snapshot services are built in and disks are automatically encrypted.
+   - You can even use your own keys, and that will ensure that no party can get to the data except you.
+
+_ **Common Compute Engine Actions** _
+  
+  - Metadata and Scripts
+    - Every VM instance stores its metadata on a metadata server
+    - The metadata server is useful in combination with startup and shutdown scripts, 
+      - because you can use the metadata server to programmatically get unique information about an instance, without additional authorization. 
+      - EG you can write a startup script that gets the metadata key/value pair for an instance's external IP address 
+      - and use that IP address in your script to set up a database
+    - Because the default metadata keys are the same on every instance, you can reuse your script without having to update it for each instance
+      - This helps you create less brittle code for your applications.
+    - Storing and retrieving instance metadata is a very common Compute Engine action
+    - recommend storing the startup and shutdown scripts in Cloud Storage
+  - Move an Instance to a New Zone
+    - Another common action is to move an instance to a new zone. For example, you might do so for geographical reasons or because a zone is being deprecated.
+    - If you move your instance within the same region, you can automate the move by using the gcloud compute instances move command.
+    - This involves making a snapshot of all persistent disks and creating new disks in the destination zone from that snapshot. 
+      - Next, you create the new VM in the destination zone and attach the new persistent disks, assign a static IP, and update any references to the VM. 
+      - Finally, you delete the original VM, its disks, and the snapshot.
+  - Snapshots
+    - Back up critical data
+      - Snapshots have many use cases
+      - EG, they can be used to back up critical data into a durable storage solution to meet application, availability, and recovery requirements
+      - These snapshots are stored in Cloud Storage
+    - Migrate data between Zones
+      - Snapshots can also be used to migrate data between zones
+      - This can also be used to simply transfer data from one zone to another. 
+      - EG,  you might want to minimize latency by migrating data to a drive that can be locally attached in the zone where it is used.
+    - Transfer to SSD to improve performance
+      - Which brings me to another snapshot use case of transferring data to a different disk type
+      - For example, if you want to improve disk performance, you could use a snapshot to transfer data from a standard HDD persistent disk to a SSD persistent disk.
+    - Persistent Disk Snapshots
+      - snapshots because snapshots are available only to persistent disks and not to local SSDs
+      - Snapshots are different from public images and custom images, 
+        - which are used primarily to create instances or configure instance templates, 
+        - in that snapshots are useful for periodic backup of the data on your persistent disks.
+      - Snapshots are incremental and automatically compressed
+        - so you can create regular snapshots on a persistent disk faster and at a much lower cost than if you regularly created a full image of the disk.
+      - snapshots can be restored to a new persistent disk, allowing for a move to a new zone.
+  - Resize Persistent Dis
+    - Another common Compute Engine action is to resize your persistent disk
+    - The added benefit of increasing storage capacity is to improve I/O performance
+    - This can be achieved while the disk is attached to a running VM without having to create a snapshot
+    - Now, while you can grow disks in size, you can never shrink them, so keep this in mind.
+      
+
+
