@@ -1,0 +1,450 @@
+**Platform Fundamentals**
+
+**Cloud IAM**
+
+ - Cloud IAM is a sophisticated system built on top of email-like address names, job-type roles, and granular permissions
+
+_ **Cloud Identity and Access** _
+
+ - Identity Access Management is a way of identifying who can do what on which resource.
+   - The who can be a person, group, or application. The what refers to specific privileges or actions, and the resource could be any GCP service.
+   - For example, I could give you the privilege or role of Compute Viewer. 
+     - This provides you with read-only access to get and list Compute Engine resources, without being able to read the data stored on them.
+ - Cloud IAM is compoased of different objects
+ - Google Cloud Platform resources are organized hierarchically
+ - The Organization node is the root node in this hierarchy, 
+   - folders are the children of the organization, 
+   - projects are the children of the folders, 
+   - and the individual resources are the children of projects
+   - Each resource has exactly one parent.
+ - Cloud IAM allows you to set policies at all of these levels, where a policy contains a set of roles and role members
+   - The organization resource represents your company. Cloud IAM roles granted at this level are inherited by all resources under the organization.
+   - The folder resource could represent your department. Cloud IAM roles granted at this level are inherited by all resources that the folder contains
+   - Projects represent a trust boundary within your company. Services within the same project have a default level of trust. 
+ - The Cloud IAM policy hierarchy always follows the same path as the GCP resource hierarchy, 
+   - which means that if you change the resource hierarchy, the policy hierarchy also changes
+   - For example, moving a project into a different organization will update the project's Cloud IAM policy to inherit from the new organization's Cloud IAM policy
+ - Also, child policies cannot restrict access granted at the parent level. 
+   - For example, if I grant you the Editor role for Department X, and I grant you the Viewer role at the bookshelf project level, you still have the Editor role for that project
+     - Therefore, it is a best practice is to follow the principle of least privilege
+     - The principle applies to identities, roles, and resources.
+     - Always select the smallest scope that’s necessary for the task in order to reduce your exposure to risk
+
+_ **Organization** _
+
+ - Organization Node is a root node for google cloud resources
+ - the organization resource is the root node in the GCP resource hierarchy. This node has many roles, like the Organization Admin
+ - The Organization Admin provides a user like Bob with access to administer all resources belonging to his organization, which is useful for auditing
+ - There is also a Project Creator role, which allows a user like Alice to create projects within her organization
+ - Creating and Managing Organizations
+   - When a user with a Workspace or Cloud Identity account creates a Google Cloud Project, an Organization resource is automatically provisioned for them
+     - Then, Google Cloud communicates its availability to the Workspace or Cloud Identity super admins. 
+     - These super admin accounts should be used carefully because they have a lot of control over your organization and all the resources underneath it.
+   - Workspace/Cloud Identity super admin and Google Cloud Organization admin are key roles in the setup process lifecycle control for the Organization resource. 
+     - The two roles are generally assigned to different users or groups, although this depends on the organization structure and needs.
+   - In the context of Google Cloud Organization setup, the Workspace or Cloud Identity super administrator responsibilities are
+     - Assign the Organization admin role to some users
+     - Be a point of contact in case of recovery issues.
+     - Control the lifecycle of the Workspace or Cloud Identity account and Organization resource.
+   - The responsibilities of the Organization admin role are
+     - Define IAM policies.
+     - Determine the structure of the resource hierarchy
+     - Delegate responsibility over critical components such as Networking, Billing, and Resource Hierarchy through IAM roles
+     - Following the principle of least privilege, this role does not include the permission to perform other actions, such as creating folders
+       - To get these permissions, an Organization admin must assign additional roles to their account. 
+ - Folders 
+   - Folders provide an additional grouping mechanism and isolation boundary between projects
+   - Folders can be used to model different legal entities, departments, and teams within a company. 
+     - For example, a first level of folders could be used to represent the main departments in your organization, like departments X and Y
+     - Because folders can contain projects and other folders, each folder could then include other sub-folders to represent different teams, like teams A and B.
+     - Each team folder could contain additional sub-folders to represent different applications, like Products 1 and 2.
+   - Folders allow delegation of administration rights
+     - for example, each head of a department can be granted full ownership of all GCP resources that belong to their department
+     - Similarly, access to resources can be limited by folder, so users in one department can only access and create GCP resources within that folder.
+ - Resource Manager Roles
+   - policies are inherited from top to bottom
+   - The organization node also has a Viewer role that grants view access to all resources within an organization.
+   - The folder node has multiple roles that mimic the organizational roles but are applied to resources within a folder
+     - There is an admin role that provides full control over folders
+     - a creator role to browse the hierarchy and create folders
+     - a viewer role to view folders and projects below a resource.
+   - Similarly, for projects, there is a creator role that allows a user to create new projects, making that user automatically the owner.
+   - There is also a project deleter role that grants deletion privileges for projects.
+ 
+_ **Roles** _
+
+ - There are three types of roles in Cloud IAM: basic roles, predefined roles, and custom roles.
+ - IAM basic roles apply accross all Google Cloud services in a project
+   - In other words, IAM basic roles offer fixed, coarse-grained levels of access.
+   - The basic roles are the Owner, Editor, and Viewer roles. 
+     - The owner has full administrative access. This includes the ability to add and remove members and delete projects.
+     - The editor role has modify and delete access. This allows a developer to deploy applications and modify or configure its resources. 
+     - The viewer role has read-only access.
+   - All of these roles are concentric, the Owner role includes the permissions of the Editor role, tand he Editor role includes the permissions of the Viewer role
+   - There is also a billing administrator role to manage billing and add or remove administrators without the right to change the resources in the project.
+   - Each project can have multiple owners, editors, viewers, and billing administrators.
+ - IAM predefined roles offer more fine-grained permissions on particular services
+  - EG, a group of users is granted the InstanceAdmin role on project_a.
+    - This provides the users of that group with all the Compute Engine permissions
+    - Grouping these permissions into a role makes them easier to manage
+    - The permissions themselves are classes and methods in the APIs.
+  - EG, compute.instances.start can be broken down into the service, resource, and verb that mean 
+    - that this permission is used to start a stopped Compute Engine instance
+  - These permissions usually align with the action’s corresponding REST API.
+  - Compute Engine has several predefined IAM roles. Let’s look at three of those:
+    - The Compute Admin role provides full control of all Compute Engine resources. 
+      - This includes all permissions that start with compute, which means that every action for any type of Compute Engine resource is permitted
+    - The Network Admin role contains permissions to create, modify, and delete networking resources, except for firewall rules and SSL certificates
+      - In other words, the network admin role allows read-only access to firewall rules, SSL certificates, and instances to view their ephemeral IP addresses. 
+    - The Storage Admin role contains permissions to create, modify, and delete disks, images, and snapshots
+  - EG,  if your company has someone who manages project images and you don't want them to have the editor role on the project, 
+    - grant their account the Storage Admin role on the project
+ - IAM custom roles let you define a precise set of permissions
+   - A lot of companies use the “least-privilege” model
+     - in which each person in your organization is given the minimal amount of privilege needed to do their job. 
+   - Let’s say you want to define an “Instance Operator” role to allow some users to start and stop Compute Engine virtual machines, but not reconfigure them.
+     - Custom roles allow you to do that
+
+_ **Members** _
+
+ -  the “who” part of “who can do what on which resource.”
+ - There are five different types of members: Google Accounts, Service Accounts, Google Groups, Google Workspace domains, and Cloud Identity domains.
+   - A Google account represents a developer, an administrator, or any other person who interacts with Google Cloud.
+     - Any email address that is associated with a Google account can be an identity, including gmail.com or other domains
+     - New users can sign up for a Google account by going to the Google account signup page, without receiving mail through Gmail.
+   - A service account is an account that belongs to your application instead of to an individual end user
+     - When you run code that is hosted on Google Cloud, you specify the account that the code should run as
+     - You can create as many service accounts as needed to represent the different logical components of your application
+   - A Google Group is a named collection of Google accounts and service accounts
+     - Every group has a unique email address that is associated with the group.
+     - Google groups are a convenient way to apply an access policy to a collection of users.
+     - You can grant and change access controls for a whole group at once 
+     - instead of granting or changing access controls one-at-a-time for individual users or service accounts.
+   - A Workspace domain represents a virtual group of all the Google accounts that have been created in an organization's Workspace account
+     - Workspace domains represent your organization's internet domain name, such as example.com
+     - and when you add a user to your Workspace domain, a new Google account is created for the user inside this virtual group, such as username@example.com
+   - Google Cloud customers who are not Workspace customers can get these same capabilities through Cloud Identity
+     - Cloud Identity lets you manage users and groups using the Google Admin Console, 
+     - but you do not pay for or receive Workspace’s collaboration products such as Gmail, Docs, Drive, and Calendar.
+     - Cloud Identity is available in free and premium editions.
+     - The premium edition adds capabilities for mobile device management.
+   - Now it’s important to note that you cannot use Cloud IAM to create or manage your users or groups
+     - Instead, you can use Cloud Identity or Workspace to create and manage users
+ - What if I already have a corporate directory, How can you get your users and groups into GCP
+   - Using Google Cloud Directory Sync, your administrators can log in and manage GCP resources using the same usernames and passwords they already use
+   - This tool synchronizes users and groups from your existing Active Directory or LDAP system with the users and groups in your Cloud Identity domain
+   - The synchronization is one-way only; which means that no information in your Active Directory or LDAP map is modified
+   - Google Cloud Directory Sync is designed to run scheduled synchronizations without supervision, after its synchronization rules are set up.
+ - Single Sign-On (SSO)
+   - If you have your identity system, you can continue using your own system and processes with SSO configured
+   - When user authentication is required, Google will redirect to your system.
+   - If the user is authenticated in your system, access to Google Cloud Platform is given; otherwise, the user is prompted to sign in. 
+   - This allows you to also revoke access to GCP
+   - If your existing authentication system supports SAML2, SSO configuration is as simple as 3 links and a certificate
+   -  Otherwise, you can use a third-party solution, like ADFS, Ping, or Okta.
+   
+_ **Service Accounts** _
+
+ - another type of member is a service account.
+ - A service account is an account that belongs to your application instead of to an individual end user.
+ - This provides an identity for carrying out server-to-server interactions in a project without supplying user credentials
+   - For example, if you write an application that interacts with Google Cloud Storage, 
+     - it must first authenticate to either the Google Cloud Storage XML API or JSON API.
+ - You can enable service accounts and grant read-write access to the account on the instance where you plan to run your application
+   - Then, program the application to obtain credentials from the service account. 
+     - Your application authenticates seamlessly to the API without embedding any secret keys or credentials in your instance, image, or application code.
+ - Service accounts are identified by an email address
+ - There are three types of service accounts: user-created or custom, built-in, and Google APIs service accounts.
+   - By default, all projects come with the built-in Compute Engine default service account
+   - Apart from the default service account, all projects come with a Google Cloud Platform APIs service account, 
+     - identifiable by the email: project-number@cloudservices.gserviceaccount.com.
+   - This is a service account designed specifically to run internal Google processes on your behalf, 
+     - and it is automatically granted the Editor role on the project. 
+   - Alternatively, you can also start an instance with a custom service account
+     - Custom service accounts provide more flexibility than the default service account, but they require more management from you.
+     - You can create as many custom service accounts as you need, assign any arbitrary access scopes or Cloud IAM roles to them, 
+       - and assign the service accounts to any virtual machine instance.
+   - The Default Compute Engine Account
+     - this account is automatically created per project. 
+     - This account is identifiable by the email project-number-compute@developer.gserviceaccount.com, 
+     - and it is automatically granted the Editor role on the project.
+     - When you start a new instance using gcloud, the default service account is enabled on that instance
+     - You can override this behavior by specifying another service account or by disabling service accounts for the instance. 
+ - Scopes are used to determine whether an authenticated identity is authorized.
+   - authorization is the process of determining what permissions an authenticated identity has on a set of specified resources.
+   - EG, Applications A and B contain Authenticated Identities (or service accounts).
+     - Let’s assume that both applications want to use a Cloud Storage bucket. 
+     - They each request access from the Google Authorization server, and in return they receive an access token
+     - Application A receives an access token with read-only scope, so it can only read from the Cloud Storage bucket.
+     - Application B, in contrast, receives an access token with read-write scope, so it can read and modify data in the Cloud Storage bucket.
+   - Customizing Scopes for a VM
+     - Scopes can be customized when you create an instance using the default service account
+     - These scopes can be changed after an instance is created by stopping it.
+     - Access scopes are actually the legacy method of specifying permissions for your VM.
+     - Before the existence of IAM roles, access scopes were the only mechanism for granting permissions to service accounts.
+     - For user-created service accounts, use Cloud IAM roles instead to specify permissions.
+ - Service Account Permissions
+   - Now, roles for service accounts can also be assigned to groups or users.
+   - EG, you create a service account that has the InstanceAdmin role, which has permissions to create, modify, and delete virtual machine instances and disks
+   - Then you treat this service account as the resource, and decide who can use it by providing users or a group with the Service Account User role
+   - This allows those users to act as that service account to create, modify, and delete virtual machine instances and disks.
+   - Users who are Service Account Users for a service account can access all the resources that the service account has access to
+   - Therefore, be cautious when granting the Service Account User role to a user or group.
+ - Example, Service accounts and Cloud IAM
+   - The VMs running component_1 are granted Editor access to project_b using Service Account 1.
+   - VMs running component_2 are granted objectViewer access to bucket_1 using an isolated Service Account 2
+   - This way you can scope permissions for VMs without re-creating VMs.
+   - Essentially, Cloud IAM lets you slice a project into different microservices, 
+     - each with access to different resources, by creating service accounts to represent each one.
+   - You assign the service accounts to the VMs when they are created, 
+     - and you don’t have to ensure that credentials are being managed correctly because GCP manages security for you.
+   - How are Service accounts authenticated
+ - Service Accounts authenticate with keys
+   - Although users require a username and password to authenticate, service accounts use keys. 
+   - There are two types of service account keys: GCP-managed keys and user-managed keys.
+     - GCP-managed keys are used by GCP services such as App Engine and Compute Engin
+       - These keys cannot be downloaded and are automatically rotated and used for a maximum of two weeks
+     - User-managed keys are created, downloadable, and managed by users. 
+       - When you create a new key pair, you download the private key, which is not retained by Google. 
+       - With user-managed keys, you are responsible for security of the private key and other management operations such as key rotation
+
+_ **Cloud IAM best practices** _
+
+ - First, leverage and understand the resource hierarchy. 
+   - Specifically, use projects to group resources that share the same trust boundary.
+   - Check the policy granted on each resource and make sure you recognize the inheritance. 
+   - Because of inheritance, use the "principle of least privilege" when granting roles
+   - Finally, audit policies using Cloud audit logs and audit memberships of groups used in policies
+ - Grant roles to groups instead of individuals
+   - This allows you to update group membership, instead of changing a Cloud IAM policy.
+   - If you do this, make sure to audit membership of groups used in policies and control the ownership of the Google group used in Cloud IAM policies.
+   - You can also use multiple groups to get better control
+   - EG A Network Admin group
+     - Some of those members also need a read_write role to a Cloud Storage bucket, but others need the read_only role
+     - Adding and removing individuals from all three groups controls their total access
+     - Therefore, groups are not only associated with job roles but can exist for the purpose of role assignment.
+ - Service Accounts
+   - As mentioned before, be very careful when granting the Service Account Users role, 
+     - because it provides access to all the resources that the service account has access to.
+   - Also, when you create a service account, give it a display name that clearly identifies its purpose, ideally using an established naming convention.
+   - As for keys, establish key rotation policies and methods and audit keys with the serviceAccount.keys.list() method.
+ - Cloud Identity-Aware Proxy (Cloud IAP)
+   - Cloud IAP lets you establish a central authorization layer for applications accessed by HTTPS, 
+     - so you can use an application-level access control model instead of relying on network-level firewalls.
+   - Applications and resources protected by Cloud IAP can only be accessed through the proxy by users and groups with the correct Cloud IAM role
+   - When you grant a user access to an application or resource by Cloud IAP, 
+     - they’re subject to the fine-grained access controls implemented by the product in use without requiring a VPN.
+   - Cloud IAP performs authentication and authorization checks when a user tries to access a Cloud IAP-secured resource, as shown on the right.
+   
+**Storage and Database Services**
+
+ - From an application-centered perspective, the technology stores and retrieves the data.
+ - Google offers several data storage services to choose from. Cloud Storage, Cloud SQL, Cloud Spanner, Cloud Firestore, and Cloud Bigtable
+   - Cloud Storage
+     - Object Storage
+     - Good for: Binary or object data
+     - Such As: Images, media serving, backups
+   - Cloud SQL
+     - Relational
+     - Good for: Web frameworks
+     - Such as: CMS, eCommerce
+   - Cloud Spanner
+     - Relational
+     - Good for: RDBMS+scale, HA, HTAP
+     - Such as: User metadata, Ad/Fin/MarTech
+   - Cloud Firestore
+     - Non-Relational
+     - Good for: Hierarchical, mobile, web
+     - Such as: User profiles, game state
+   - Cloud Bigtable
+     - Non-Relational
+     - Good for: Heavy read + write, events, 
+     - Such as: AdTech, financial, IoT
+   - BigQuery
+     - Good for: Enterprise data warehouse
+     - Such as: Analytics, dashboards
+     - sits on the edge between data storage and data processing
+     - You can store data in BigQuery, but the intended use for BigQuery is big data analysis and interactive querying
+ - Storage and Database decision
+   - First, ask yourself: Is your data structured? If it’s not, choose Cloud Storage
+   - If your data is structured, does your workload focus on analytics? 
+     - If it does, you will want to choose Cloud Bigtable or BigQuery, depending on your latency and update needs
+   - Otherwise, check whether your data is relational. If it’s not relational, choose Cloud Firestore. 
+   - If it is relational, you will want to choose Cloud SQL or Cloud Spanner, depending on your need for horizontal scalability.
+
+_ **Cloud Storage** _
+
+ - Cloud Storage is an object storage service 
+ -  it allows world-wide storage and retrieval of any amount of data at any time
+ - You can use Cloud Storage for a range of scenarios including 
+   - serving website content, storing data for archival and disaster recovery, or distributing large data objects to users via direct download. 
+ - Cloud Storage has a couple of key features:
+   - It’s scalable to exabytes of data
+   - The time to first byte is in milliseconds
+   - It has very high availability across all storage classes
+   - And It has a single API across those storage classes
+ - Some like to think of Cloud Storage as files in a file system but it’s not really a file system
+   -  Instead, Cloud Storage is a collection of buckets that you place objects into.
+   - You can create directories, but really a directory is just another object that points to different objects in the bucket
+   - You’re not going to easily be able to index all of these files like you would in a file system
+   - You just have a specific URL to access objects
+ - Cloud Storage has four storage classes: Standard, Nearline, Coldline and Archive and each of those storage classes provide 3 location types
+   - There’s a multi-region is a large geographic area, such as the United States, that contains two or more geographic places.
+   - Dual-region is a specific pair of regions, such as Finland and the Netherlands
+   - A region is a specific geographic place, such as London
+ - Objects stored in a multi-region or dual-region are geo-redundant. Now, let’s go over each of the storage classes
+   - Standard Storage is best for data that is frequently accessed (think of "hot" data) and/or stored for only brief periods of time
+     - This is the most expensive storage class but it has no minimum storage duration and no retrieval cost.
+     - When used in a region, Standard Storage is appropriate for storing data in the same location as 
+       - Google Kubernetes Engine clusters or Compute Engine instances that use the data
+       - Co-locating your resources maximizes the performance for data-intensive computations and can reduce network charges.
+     - When used in a dual-region, you still get optimized performance when accessing Google Cloud products 
+       - that are located in one of the associated regions, 
+       - but you also get improved availability that comes from storing data in geographically separate locations.
+     - When used in multi-region, Standard Storage is appropriate for storing data that 
+       - is accessed around the world, such as serving website content, streaming videos, executing interactive workloads, 
+       - or serving data supporting mobile and gaming applications
+   - Nearline Storage is a low-cost, highly durable storage service 
+     - for storing infrequently accessed data like data backup, long-tail multimedia content, and data archiving
+     - Nearline Storage is a better choice than Standard Storage in scenarios where slightly lower availability
+     - a 30-day minimum storage duration, and costs for data access are acceptable trade-offs for lowered at-rest storage costs
+   - Coldline Storage is a very-low-cost, highly durable storage service for storing infrequently accessed data
+     - Coldline Storage is a better choice than Standard Storage or Nearline Storage in scenarios where 
+       - slightly lower availability, a 90-day minimum storage duration, and higher costs for data access are acceptable trade-offs 
+       - for lowered at-rest storage costs.
+   - Archive Storage is the lowest-cost, highly durable storage service for data archiving, online backup, and disaster recovery
+     - Unlike the "coldest" storage services offered by other Cloud providers, your data is available within milliseconds, not hours or days.
+     - Unlike other Cloud Storage classes, Archive Storage has no availability SLA, 
+       - though the typical availability is comparable to Nearline Storage and Coldline Storage
+     - Archive Storage also has higher costs for data access and operations, as well as a 365-day minimum storage duration
+     - Archive Storage is the best choice for data that you plan to access less than once a year.
+ - Cloud Storage Overview
+   - First of all, there are buckets which are required to have a globally unique name and cannot be nested
+   - The data that you put into those buckets are objects that inherit the storage class of the bucket 
+     - and those objects could be text files, doc files, video files, etc
+     - There is no minimum size to those objects and you can scale this as much as you want as long as your quota allows it
+   - To access the data, you can use the gsutil command, or either the JSON or XML APIs
+ - Changing default storage classes
+   - When you upload an object to a bucket, the object is assigned the bucket's storage class, unless you specify a storage class for the object
+   - You can change the default storage class of a bucket but you can't change the location type from regional to multi-region/dual-region or vice versa
+   - You can also change the storage class of an object that already exists in your bucket 
+     - without moving the object to a different bucket or changing the URL to the object.
+   - Setting a per-object storage class is useful, for example, if you have objects in your bucket that you want to keep, 
+     - but that you don't expect to access frequently
+   - In this case, you can minimize costs by changing the storage class of those specific objects to Nearline, Coldline or Archive Storage
+   - In order to help manage the classes of objects in your bucket, Cloud Storage offers Object Lifecycle Management
+   - Default class is applied to new objects.
+   - Regional bucket can never be changed to multi-region/dual-region.
+   - Multi-regional bucket can never be changed to regional.
+   - Objects can be moved from bucket to bucket.
+   - Object Lifecycle Management can manage the classes of objects.
+ - Access Control
+   - We can use IAM for the project to control which individual user or service account can see the bucket, 
+     - list the objects in the bucket, view the names of the objects in the bucket, or create new buckets. 
+     - For most purposes, Cloud IAM is sufficient, and roles are inherited from project to bucket to object. 
+   - Access control lists or ACLs offer finer control.
+   - For even more detailed control, signed URLs provide a cryptographic key that gives time-limited access to a bucket or object. 
+   - Finally, a signed policy document further refines the control by determining what kind of file can be uploaded by someone with a signed URL
+   - An ACL is a mechanism you can use to define who has access to your buckets and objects, as well as what level of access they have.
+     - The maximum number of ACL entries you can create for a bucket or object is 100.
+   - Each ACL consists of one or more entries, and these entries consist of two pieces of information
+     - A scope, which defines who can perform the specified actions (for example, a specific user or group of users). 
+     - And a permission, which defines what actions can be performed (for example, read or write).
+ - Signed URLs
+   - For some applications, it is easier and more efficient to grant limited-time access tokens that can be used by any user, 
+     - instead of using account-based authentication for controlling resource access. 
+     - (For example, when you don’t want to require users to have Google accounts). 
+   - Signed URLs allow you to do this for Cloud Storage
+     - You create a URL that grants read or write access to a specific Cloud Storage resource and specifies when the access expires
+     - That URL is signed using a private key associated with a service account. 
+     - When the request is received, Cloud Storage can verify that the access-granting URL was issued on behalf of a trusted security principal, 
+       - in this case the service account, and delegates its trust of that account to the holder of the URL.
+   - After you give out the signed URL, it is out of your control.
+     - So you want the signed URL to expire after some reasonable amount of time.
+ - Cloud Storage Features
+   - Customer-supplied encryption keys when attaching persistent disks to virtual machines
+     -  This allows you to supply your own encryption keys instead of the Google-managed keys, which is also available for Cloud Storage.
+   - Cloud Storage also provides Object Lifecycle Management which lets you automatically delete or archive objects
+   - Another feature is object versioning which allows you to maintain multiple versions of objects in your bucket.
+     - You are charged for the versions as if they were multiple files, which is something to keep in mind
+   - Cloud Storage also offers directory synchronization so that you can sync a VM directory with a bucket.
+   - Object change notifications can be configured for Cloud Storage using Pub/Sub
+ - Object Versioning supports the retrieval of objects that are deleted or overwritten
+   - In Cloud Storage, objects are immutable, which means that an uploaded object cannot change throughout its storage lifetime
+   - To support the retrieval of objects that are deleted or overwritten, Cloud Storage offers the Object Versioning feature
+   - Object Versioning can be enabled for a bucket. 
+   - Once enabled, Cloud Storage creates an archived version of an object each time the live version of the object is overwritten or deleted.
+   - The archived version retains the name of the object but is uniquely identified by a generation number as illustrated on this slide by g1.
+   - When Object Versioning is enabled, you can list archived versions of an object, 
+     - restore the live version of an object to an older state, or permanently delete an archived version, as needed
+   - You can turn versioning on or off for a bucket at any time
+   - Turning versioning off leaves existing object versions in place and causes the bucket to stop accumulating new archived object versions.
+ - Object Lifecycle Management policies specify actions to be performed on objects that meet certain rules
+   - To support common use cases like setting a 
+     - Time to Live for objects, archiving older versions of objects, 
+     - or "downgrading" storage classes of objects to help manage costs, Cloud Storage offers Object Lifecycle Management. 
+   - You can assign a lifecycle management configuration to a bucket
+   - The configuration is a set of rules that apply to all the objects in the bucket.
+   - So when an object meets the criteria of one of the rules, Cloud Storage automatically performs a specified action on the object.
+   - Examples
+     - First, downgrade the storage class of objects older than a year to Coldline Storage.
+     - Second, delete objects created before a specific date. For example, January 1, 2017.
+     - And third, keep only the 3 most recent versions of each object in a bucket with versioning enabled.
+   - Object inspection occurs in asynchronous batches, so rules may not be applied immediately
+   - Also, updates to your lifecycle configuration may take up to 24 hours to go into effect.
+   - This means that when you change your lifecycle configuration, 
+     - Object Lifecycle Management may still perform actions based on the old configuration for up to 24 hours
+ - Pub/Sub notifications for Cloud Storage
+   - You can configure object change notifications for Cloud Storage using Cloud Pub/Sub.
+   - Pub/Sub notifications sends information about changes to objects in your buckets to Pub/Sub, 
+     - where the information is added to a Pub/Sub topic of your choice in the form of messages.
+   - For example, you can track objects that are created and deleted in your bucket
+   - Each notification contains information describing both the event that triggered it and the object that changed.
+   - You can send notifications to any Pub/Sub topic in any project for which you have sufficient permissions
+   - Once received by the Pub/Sub topic, the resulting message can be sent to any number of subscribers to the topic.
+   - Pub/Sub notifications are the recommended way to track changes to objects in your Cloud Storage buckets 
+     - because they're faster, more flexible, easier to set up, and more cost-effective. 
+   - Pub/Sub is Google’s distributed real-time messaging service, which is covered in the Developing Applications track.
+ - Data Import Services
+   - The Cloud Console allows you to upload individual files to your bucket. 
+   - But what if you have to upload terabytes or even petabytes of data? 
+   - There are three services that address this: 
+     - Transfer Appliance
+     - Storage Transfer Service
+     - Offline Media Import
+   - Transfer Appliance is a hardware appliance you can use to securely migrate large volumes of data 
+     - (from hundreds of terabytes up to 1 petabyte) to Google Cloud without disrupting business operations.
+   - The Storage Transfer Service enables high-performance imports of online data
+     - That data source can be another Cloud Storage bucket, an Amazon S3 bucket, or an HTTP/HTTPS location.
+   - Offline Media Import is a third party service where physical media 
+     - (such as storage arrays, hard disk drives, tapes, and USB flash drives) 
+     - is sent to a provider who uploads the data.
+ - Cloud Storage provides strong global consistency
+   - When you upload an object to Cloud Storage and you receive a success response, 
+     - the object is immediately available for download and metadata operations from any location where Google offers service
+   - This is true whether you create a new object or overwrite an existing object.
+   - Because uploads are strongly consistent, you will never receive a 404 Not Found response 
+     - or stale data for a read-after-write or read-after-metadata-update operation
+   - Strong global consistency also extends to deletion operations on objects
+     - If a deletion request succeeds, an immediate attempt to download the object or its metadata will result in a 404 Not Found status code
+     - You get the 404 error because the object no longer exists after the delete operation succeeds.
+   - Bucket listing is strongly consistent. 
+     - For example, if you create a bucket, then immediately perform a list buckets operation, the new bucket appears in the returned list of buckets.
+   - Object Listing is also strongly consistent
+     - For example, if you upload an object to a bucket and then immediately perform a list objects operation, 
+     - the new object appears in the returned list of objects.
+ - Choosing a Storage Class
+   - If you will read your data less than once a year, you should consider using Archive storage. 
+   - If you will read your data less than once per 90 days, you should consider using Coldline storage.
+   - If you will read your data less than once per 30 days, you should consider using Nearline storage.
+   - And if you will be doing reads and writes more often than that, you should consider using Standard storage.
+   - You also want to take into account the location type:
+     - Use a region to help optimize latency and network bandwidth for data consumers, such as analytics pipelines, that are grouped in the same region
+     - Use a dual-region when you want similar performance advantages as regions, but also want the higher availability that comes with being geo-redundant.
+     - Use a multi-region when you want to serve content to data consumers that 
+       - are outside of the Google network and distributed across large geographic areas, 
+       - or when you want the higher data availability that comes with being geo-redundant.
+
+_ **Cloud SQL** _
+
+
