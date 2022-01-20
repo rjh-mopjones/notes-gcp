@@ -447,4 +447,369 @@ _ **Cloud Storage** _
 
 _ **Cloud SQL** _
 
+ - The question really is, should you build your own database solution or use a managed service?
+ - Cloud SQL is a fully managed service of either MySQL, PostgreSQL, or Microsoft SQL Server databases.
+   - Patches and updates automatically applied
+   - You administer MySQL users
+   - Cloud SQL supports many clients
+     - gcloud sql
+     - App Engine, Google Workspace scripts
+     - Applications and tools
+       - SQL Workbench, Toad
+       - External applications using standard MySQL drivers
+   - This means that patches and updates are automatically applied but you still have to administer MySQL users with the native authentication tools that come with these databases.
+   - Cloud SQL supports many clients, such as Cloud Shell, App Engine and Google Workspace scripts
+     - It also supports other applications and tools that you might be used to like SQL Workbench, 
+       - Toad and other external applications using standard MySQL drivers.
+   - Cloud SQL delivers high performance and scalability with up to 30 TB of storage capacity, 40,000 IOPS, and 416 GB of RAM per instance
+     - You can easily scale up to 64 processor cores and scale out with read replicas.
+   - Currently, you can use Cloud SQL with either MySQL 5.6, 5.7, or 8.0, PostgreSQL 9.6, 10, 11, or 12, or either of the Web, Express, Standard or Enterprise SQL Server 2017 editions 
+   - There is replica service that can replicate data between multiple zones
+   - Cloud SQL also provides automated and on-demand backups with point-in-time recovery.
+   - You can import and export databases using mysqldump, or import and export CSV files. 
+   - Cloud SQL can also scale up, which does require a machine restart or scale out using read replicas. 
+     - That being said, if you are concerned about horizontal scalability, you’ll want to consider Cloud Spanner which we’ll cover later in this module.
+   - Choosing a connection type to your Cloud SQL instance will influence how secure, performant, and automated it will be
+     - If your are connecting an application that is hosted within the same Google Cloud project as your Cloud SQL instance, 
+       - and it is collocated in the same region, 
+       - choosing the Private IP connection will provide you with the most performant and secure connection using private connectivity.
+       - In other words, traffic is never exposed to the public internet.
+     - If the application is hosted in another region or project, or if you are trying to connect to your Cloud SQL instance from outside of Google Cloud, you have 3 options
+       - In this case, I recommend using the Cloud SQL Proxy, which handles authentication, encryption, and key rotation for you.
+       - If you need manual control over the SSL connection, you can generate and periodically rotate the certificates yourself
+       - Otherwise, you can use an unencrypted connection by authorizing a specific IP address to connect to your SQL server over its external IP address
+ - If you need more than 30 TB of storage space or over 4000 concurrent connections to your database, 
+   - or if you want your application design to be responsible for scaling, availability, and location management when scaling up globally, then consider using Cloud Spanner
 
+_ **Cloud Spanner** _
+ 
+ - If Cloud SQL does not fit your requirements because you need horizontal scalability, consider using Cloud Spanner.
+ - Cloud Spanner combines the benefits of relational database structure with non-relational horizontal scale
+ - Cloud Spanner is a service built for the cloud specifically to combine the benefits of relational database structure with non-relational horizontal scale. 
+ - This service can provide petabytes of capacity and offers transactional consistency at global scale, schemas, SQL, and automatic, synchronous replication for high availability.
+   - Use cases include financial applications and inventory applications traditionally served by relational database technology.
+ - Depending on whether you create a multi-regional or regional instance, you’ll have different monthly uptime SLAs
+ - Let’s compare Cloud Spanner with both relational and non-relational databases
+   - Like a relational database, Cloud Spanner has schema, SQL, and strong consistency
+   - Also, like a non-relational database, Cloud Spanner offers high availability, horizontal scalability, and configurable replication.
+   - Cloud Spanner offers the best of the relational and non-relational worlds
+   - These features allow for mission-critical uses cases, such as building consistent systems for transactions and inventory management in the financial services and retail industries
+ - Cloud Spanner Architecture
+   - A Cloud Spanner instance replicates data in N cloud zones, which can be within one region or across several regions
+   - The database placement is configurable, meaning you can choose which region to put your database in
+   - This architecture allows for high availability and global placement.
+ - Data replication is synchronized across zones using Google’s global fiber network
+   - The replication of data will be synchronized across zones using Google’s global fiber network.
+   - Using atomic clocks ensures atomicity whenever you are updating your data.
+ - Chooisng Cloud Spanner
+   - If you have outgrown any relational database, are sharding your databases for throughput high performance, need 
+     - transactional consistency, global data and strong consistency, 
+     - or just want to consolidate your database, 
+     - consider using Cloud Spanner.
+   - If you don’t need any of these, nor full relational capabilities, consider a NoSQL service such as Cloud Firestore
+
+_ **Cloud Firestore** _
+
+- Cloud Firestore is a NoSQL document database
+- Cloud Firestore is a fast, fully managed, serverless, cloud-native NoSQL document database 
+  - that simplifies storing, syncing, and querying data for your mobile, web, and IoT apps at global scale
+  - Its client libraries provide live synchronization and offline support, and its security features and integrations with Firebase and GCP accelerate building truly serverless apps
+- Cloud Firestore also supports ACID transactions, so if any of the operations in the transaction fail and cannot be retried, the whole transaction will fail.
+- Also, with automatic multi-region replication and strong consistency, your data is safe and available, even when disasters strike
+  - Cloud Firestore even allows you to run sophisticated queries against your NoSQL data without any degradation in performance.
+  - This gives you more flexibility in the way you structure your data
+- Cloud Firestore is actually the next generation of Cloud Datastore 
+  - Cloud Firestore can operate in Datastore mode, making it backwards- compatible with Cloud Datastore
+  - By creating a Cloud Firestore database in Datastore mode, you can access Cloud Firestore's improved storage layer while keeping Cloud Datastore system behavior
+  - This removes the following Cloud Datastore limitations:
+    - Queries are no longer eventually consistent; instead, they are all strongly consistent.
+    - Transactions are no longer limited to 25 entity groups.
+    - Writes to an entity group are no longer limited to 1 per second
+  - Cloud Firestore in Native mode introduces new features such as
+    - A new, strongly consistent storage layer
+    - A collection and document data model
+    - Real-time updates
+    - Mobile and Web client libraries
+  - Cloud Firestore is backward compatible with Cloud Datastore, but the new data model, real-time updates, and mobile and web client library features are not
+    - To access all of the new Cloud Firestore features, you must use Cloud Firestore in Native mode.
+    - A general guideline is to use Cloud Firestore in Datastore mode for new server projects, and Native mode for new mobile and web apps.
+  - As the next generation of Cloud Datastore, Cloud Firestore is compatible with all Cloud Datastore APIs and client libraries
+    -  Existing Cloud Datastore users will be live-upgraded to Cloud Firestore automatically at a future date
+- Choosing Cloud FireStore
+  - If your schema might change and you need an adaptable database, you need to scale to zero, or you want low maintenance overhead scaling up to terabytes, 
+    - consider using Cloud Firestore.
+  - Also, if you don’t require transactional consistency, you might want to consider Cloud Bigtable, depending on the cost or size
+
+_ **Cloud BigTable** _
+
+- If you don’t require transactional consistency, you might want to consider Cloud Bigtable.
+- Cloud Bigtable is a fully managed NoSQL database with petabyte-scale and very low latency
+  - It seamlessly scales for throughput and it learns to adjust to specific access patterns
+  - Cloud Bigtable is actually the same database that powers many of Google’s core services, including Search, Analytics, Maps, and Gmail.
+- Cloud Bigtable is a great choice for both operational and analytical applications, including IoT, user analytics, and financial data analysis, 
+  - because it supports high read and write throughput at low latency
+  - It’s also a great storage engine for machine learning applications.
+- Cloud Bigtable integrates easily with popular big data tools like Hadoop, Cloud Dataflow, and Cloud Dataproc
+  - Plus, Cloud Bigtable supports the open source industry standard HBase API, which makes it easy for your development teams to get started. 
+    - Cloud Dataflow and Cloud Dataproc are covered late in the course series
+- Cloud BigTable Storage model
+  - Cloud Bigtable stores data in massively scalable tables, each of which is a sorted key/value map
+  - The table is composed of rows, each of which typically describes a single entity, and columns, which contain individual values for each row
+  - Each row is indexed by a single row key, and columns that are related to one another are typically grouped together into a column family
+  - Each column is identified by a combination of the column family and a column qualifier, which is a unique name within the column family.
+  - Each row/column intersection can contain multiple cells, or versions, at different timestamps, providing a record of how the stored data has been altered over time
+    - Cloud Bigtable tables are sparse; if a cell does not contain any data, it does not take up any space.
+  - EG, for a hypothetical social network for United States presidents, where each president can follow posts from other presidents. Let me highlight some things:
+    - The table contains one column family, the follows family. This family contains multiple column qualifiers.
+    - Column qualifiers are used as data. This design choice takes advantage of the sparseness of Cloud Bigtable tables, 
+      - and the fact that new column qualifiers can be added as your data changes
+    - The username is used as the row key.
+      - Assuming usernames are evenly spread across the alphabet, data access will be reasonably uniform across the entire table. 
+- processing, which is done through a front-end server pool and nodes, is handled separately from the storage
+- A Cloud Bigtable table is sharded into blocks of contiguous rows, called tablets, to help balance the workload of queries.
+- Tablets are similar to HBase regions, for those of you who have used the HBase API
+- Tablets are stored on Colossus, which is Google's file system, in SSTable format
+  -  An SSTable provides a persistent, ordered immutable map from keys to values, where both keys and values are arbitrary byte strings.
+- Cloud Bigtable learns to adjust to specific access patterns. If a certain Bigtable node is frequently accessing a certain subset of data
+  - Cloud Bigtable will update the indexes so that other nodes can distribute that workload evenly
+- throughput scales linearly, so for every single node that you do add, you're going to see a linear scale of throughput performance, up to hundreds of nodes. 
+- Choosing Cloud Bigtable
+  - if you need to store more than 1 TB of structured data, have very high volume of writes, 
+  - need read/write latency of less than 10 milliseconds along with strong consistency, 
+  - or need a storage service that is compatible with the HBase API, 
+  - consider using Cloud Bigtable
+  - If you don’t need any of these and are looking for a storage service that scales down well, consider using Cloud Firestore.
+  - Speaking of scaling, the smallest Cloud Bigtable cluster you can create has three nodes and can handle 30,000 operations per second
+    - Remember that you pay for those nodes while they are operational, whether your application is using them or not.
+
+_ **Cloud Memorystore** _
+
+ - Cloud Memorystore is a fully managed Redis service 
+ - Cloud Memorystore for Redis provides a fully managed in-memory data store service built on scalable, secure, and highly available infrastructure managed by Google
+ - Applications running on GCP can achieve extreme performance by leveraging the highly scalable, available, secure Redis service 
+   - without the burden of managing complex Redis deployments.
+   - This allows you to spend more time writing code so that you can focus on building great apps
+ - Cloud Memorystore also automates complex tasks like enabling high availability, failover, patching, and monitoring 
+ - High availability instances are replicated across two zones and provide a 99.9% availability SLA.
+ - You can easily achieve the sub-millisecond latency and throughput your applications need.
+ - Start with the lowest tier and smallest size, and then grow your instance effortlessly with minimal impact to application availability.
+ - Cloud Memorystore can support instances up to 300 GB and network throughput of 12 Gbps
+ - Because Cloud Memorystore for Redis is fully compatible with the Redis protocol, 
+   - you can lift and shift your applications from open source Redis to Cloud Memorystore without any code changes by using the import/export feature
+ - There is no need to learn new tools because all existing tools and client libraries just work.
+
+**Resource Management**
+
+ - Resource Management. Resources in GCP are billable, so managing them means controlling cost
+ - There are several methods in place for controlling access to the resources, and there are quotas that limit consumption
+ - In most cases, the default quotas can be raised on request, 
+   - but having them in place provides a checkpoint or a chance to make sure that this really is a resource you intend to consume in greater quantity
+
+_ **Resource Manager** _
+ 
+ - Resource Manager lets you hierarchically manage resources, building on Cloud IAM
+ - The resource manager lets you hierarchically manage resources by project, folder, and organization.
+   - This should sound familiar because we covered it in the Cloud IAM module
+     - Policies contain a set of roles and members, and policies are set on resources.
+     - These resources inherit policies from their parent
+     - Therefore, resource policies are a union of parent and resource.
+     - Also, keep in mind that if a parent policy is less restrictive, it overrides the more restrictive resource policy.
+ - Although IAM policies are inherited top-to-bottom, billing is accumulated from the bottom up,
+ - Resource consumption is measured in quantities, like rate of use or time, number of items, or feature use
+ - Because a resource belongs to only one project, a project accumulates the consumption of all its resources. 
+ - Each project is associated with one billing account, which means that an organization contains all billing accounts
+ - organization node is the root node for all Google Cloud Platform resources
+   - EG, Bob, who is in control of the organizational domain through the organization admin role
+   -  Bob has delegated privileges and access to the individual projects to Alice by making her a project creator
+ - Project accumulates the consumption of all its resources
+   - Project accumulates the consumption of all its resources
+     - Specifically, projects let you enable billing, manage permissions and credentials, and enable service and APIs
+   - To interact with Cloud Platform resources, you must provide the identifying project information for every request. 
+   - A project can be identified by:
+     - The project name, which is a human-readable way to identify your projects, but it isn't used by any Google APIs.
+     - There is also the project number, which is automatically generated by the server and assigned to your project
+     - And there is the project ID, which is a unique ID that is generated from your project name
+ - Resource hierarchy
+   - From a physical organization standpoint, resources are categorized as global, regional, or zonal.
+     - Images, snapshots, and networks are global resources;
+     - External IP addresses are regional resources
+     - and instances and disks are zonal resources
+   - However, regardless of the type, each resource is organized into a project.
+     - This enables each project to have its own billing and reporting
+
+_ **Quotas** _
+
+ - All resources in GCP are subject to project quotas or limits. These typically fall into one of the three categories shown here:
+   - How many resources you can create per project. For example, you can only have 5 VPC networks per project
+   - How quickly you can make API requests in a project or rate limits. 
+     - For example, by default, you can only make 5 administrative actions per second per project when using the Cloud Spanner API.
+   - There also regional quotas. For example, by default, you can only have 24 CPUs per region.
+ - As your use of GCP expands over time, your quotas may increase accordingly. 
+   - If you expect a notable upcoming increase in usage, you can proactively request quota adjustments from the Quotas page in the GCP Console.
+   -  This page will also display your current quotas.
+ - Why Project Quotas
+   - Project quotas prevent runaway consumption in case of an error or malicious attack
+     - For example, imagine you accidentally create 100 instead of 10 Compute Engine instances using the gcloud command line.
+   - Quotas also prevent billing spikes or surprises
+     - Quotas are related to billing, but we will go through how to set up budgets and alerts later, which will really help you manage billing
+   - Finally, quotas force sizing consideration and periodic review
+     - EG, do you really need a 96-core instance, or can you go with a smaller and cheaper alternative
+ - It is also important to mention that quotas are the maximum amount of resources you can create for that resource type as long as those resources are available
+   - Quotas do not guarantee that resources will be available at all times
+   - EG, If a region is out of local SSDs, you cannot create local SSDs in that region, even if you still had quota for local SSDs
+   
+_ **Labels and Names** _
+
+ - Labels are a utility for organizing GCP resources
+ - Labels are key-value pairs that you can attach to your resources, like VMs, disks, snapshots and images
+ - You can create and manage labels using the GCP console, gcloud, or the Resource Manager API, and each resource can have up to 64 labels
+ - EG, you could create a label to define the environment of your virtual machines
+   - Then you define the label for each of your instances as either production or test
+   - Using this label, you could search and list all your production resources for inventory purposes
+ - Labels can also be used in scripts to help analyze costs or to run bulk operations on multiple resources.
+ - Use labels for
+   - I recommend adding labels based on team or cost center to distinguish instances owned by different teams
+     - You can use this type of label for cost accounting or budgeting. For example, team:marketing and team:research
+   - You can also use labels to distinguish components. For example, component:redis, component:frontend
+   - Again, you can label based on environment or stage
+   - You should also consider using labels to define an owner or a primary contact for a resource. For example, owner:gaurav, contact:opm
+   - Or add labels to your resources to define their state. For example, state:inuse, state:readyfordeletion
+ -  it’s important to not confuse labels with tags.
+   - Labels, we just learned, are user-defined strings in key-value format that are used to organize resources, and they can propagate through billing. 
+   - Tags, on the other hand, are user-defined strings that are applied to instances only and are mainly used for networking, such as applying firewall rules
+
+_ **Billing** _
+ 
+ - Budget and Email Alerts
+   - To help with project planning and controlling costs, you can set a budget. Setting a budget lets you track how your spend is growing toward that amount
+     - First, you set a budget name and specify which project this budget applies to
+     - Then, you can set the budget at a specific amount or match it to the previous month's spend
+     - After you determine your budget amount, you can set the budget alerts
+       - These alerts send emails to billing admins after spend exceeds a percent of the budget or a specified amount. 
+   - In our case, it would send an email when spending reaches 50%, 90%, and 100% of the budget amount.
+   - You can even choose to send an alert when the spend is forecasted to exceed the percent of the budget amount by the end of the budget period.
+   - In addition to receiving an email, you can use Cloud Pub/Sub notifications to programmatically receive spend updates about this budget.
+     - You could even create a Cloud Function that listens to the Pub/Sub topic to automate cost management
+ - Labels can help you optimize GCP spend
+   - Another way to help optimize your GCP spend is to use labels
+   - EG, you could label VM instances that are spread across different regions
+     - Maybe these instances are sending most of their traffic to a different continent, which could incur higher costs
+     - In that case, you might consider relocating some of those instances or using a caching service like Cloud CDN to cache content closer to your users, 
+       - which reduces your networking spend.
+   - I recommend labeling all your resources and exporting your billing data to BigQuery to analyze your spend
+ - Visualize GCP spend with Data Studio
+   - Data Studio turns your data into informative dashboards and reports that are easy to read, easy to share, and fully customizable
+   - For example, you can slice and dice your billing reports using your labels. 
+
+
+
+**Resource Monitoring**
+
+_ **Google Cloud's Operations Suite** _
+
+ - Google Cloud’s operations suite dynamically discovers cloud resources and application services based on deep integration with Google Cloud and Amazon Web Services
+ - Because of its smart defaults, you can have core visibility into your cloud platform in minutes.
+ - This provides you with access to powerful data and analytics tools plus collaboration with many different third-party software providers
+ - Google Cloud’s operations suite has services for monitoring, logging, error reporting, fault tracing, and debugging
+ - You only pay for what you use, and there are free usage allotments so that you can get started with no upfront fees or commitments
+ - Now, in most other environments, these services are handled by completely different packages, or by a loosely integrated collection of software
+ - When you see these functions working together in a single, comprehensive, and integrated service, 
+   - you'll realize how important that is to creating reliable, stable, and maintainable applications. 
+ - Google Cloud’s operations suite also supports a rich and growing ecosystem of technology partners, as shown on this slide.
+ - This helps expand the IT ops, security, and compliance capabilities available to Google Cloud customers
+
+_ **Monitoring** _
+
+ - Monitoring is important to Google because it is at the base of site reliability engineering, or SRE.
+ - SRE is a discipline that applies aspects of software engineering to operations whose goals are to create ultra-scalable and highly reliable software systems
+ - This discipline has enabled Google to build, deploy, monitor, and maintain some of the largest software systems in the world
+ - Cloud Monitoring dynamically configures monitoring after resources are deployed 
+   - and has intelligent defaults that allow you to easily create charts for basic monitoring activities
+ - This allows you to monitor your platform, system, and application metrics by ingesting data, such as metrics, events, and metadata
+   - You can then generate insights from this data through dashboards, charts, and alerts. 
+   - For example, you can configure and measure uptime and health checks that send alerts via email.
+ - A Workspace is the root entity that holds monitoring and configuration information in Cloud Monitoring
+   - Each Workspace can have between 1 and 100 monitored projects, including one or more Google Cloud projects and any number of AWS accounts.
+   - You can have as many Workspaces as you want, but Google Cloud projects and AWS accounts can't be monitored by more than one Workspace.
+   - A Workspace contains the custom dashboards, alerting policies, uptime checks, notification channels, and group definitions that you use with your monitored projects
+   - A Workspace can access metric data from its monitored projects, but the metric data and log entries remain in the individual projects.
+   - The first monitored Google Cloud project in a Workspace is called the hosting project, and it must be specified when you create the Workspace
+   - The name of that project becomes the name of your Workspace
+   - To access an AWS account, you must configure a project in Google Cloud to hold the AWS Connector
+   - Because Workspaces can monitor all your Google Cloud projects in a single place, a Workspace is a “single pane of glass” 
+     - through which you can view resources from multiple Google Cloud projects and AWS accounts
+   -  All users of Google Cloud’s operations suite with access to that Workspace have access to all data by default.
+   - This means that a role assigned to one person on one project applies equally to all projects monitored by that Workspace.
+   - In order to give people different roles per-project and to control visibility to data, consider placing the monitoring of those projects in separate Workspaces.
+ - Cloud Monitoring allows you to create custom dashboards that contain charts of the metrics that you want to monitor
+   - For example, you can create charts that display your instances’ CPU utilization, the packets or bytes sent and received by those instances,
+     - and the packets or bytes dropped by the firewall of those instances.
+   - In other words, charts provide visibility into the utilization and network traffic of your VM instances, as shown on this slide
+   - These charts can be customized with filters to remove noise, groups to reduce the number of time series, and aggregates to group multiple time series together
+ - create alerting policies that notify you when specific conditions are met
+   - EG, you can create an alerting policy when the network egress of your VM instance goes above a certain threshold for a specific timeframe.
+   - When this condition is met, you or someone else can be automatically notified through email, SMS, or other channels in order to troubleshoot this issue
+   - You can also create an alerting policy that monitors your usage of Google Cloud’s operations suite and alerts you when you approach the threshold for billing
+   - Best practices
+     - alerting on symptoms, and not necessarily causes. For example, you want to monitor failing queries of a database and then identify whether the database is down
+     - make sure that you are using multiple notification channels, like email and SMS. This helps avoid a single point of failure in your alerting strategy
+     - customizing your alerts to the audience’s need by describing what actions need to be taken or what resources need to be examined
+     - avoid noise, because this will cause alerts to be dismissed over time.  
+       - Specifically, adjust monitoring alerts so that they are actionable and don’t just set up alerts on everything possible
+ - Uptime checks can be configured to test the availability of your public services from locations around the world,
+   - The type of uptime check can be set to HTTP, HTTPS, or TCP
+   - The resource to be checked can be an App Engine application, a Compute Engine instance, a URL of a host, or an AWS instance or load balancer. 
+   - For each uptime check, you can create an alerting policy and view the latency of each global location
+ - Cloud Monitoring can access some metrics without the Monitoring agent,
+   - including CPU utilization, some disk traffic metrics, network traffic, and uptime information.
+   - However, to access additional system resources and application services, you should install the Monitoring agent
+   - The Monitoring agent is supported for Compute Engine and EC2 instances.
+ - If the standard metrics provided by Cloud Monitoring do not fit your needs, you can create custom metrics
+   - EG, imagine a game server that has a capacity of 50 users. 
+   - What metric indicator might you use to trigger scaling events? 
+   - From an infrastructure perspective, you might consider using CPU load or perhaps network traffic load as values that are somewhat correlated with the number of users.
+   - But with a Custom Metric, you could actually pass the current number of users directly from your application into Cloud Monitoring
+
+_ **Logging** _
+
+ - Cloud Logging allows you to store, search, analyze, monitor, and alert on log data and events from Google Cloud and AWS
+ - It is a fully managed service that performs at scale and can ingest application and system log data from thousands of VMs
+ - Logging includes storage for logs, a user interface called the Logs Viewer, and an API to manage logs programmatically
+ - The service lets you read and write log entries, search and filter your logs, and create log-based metrics
+ - Logs are only retained for 30 days, but you can export your logs to Cloud Storage buckets, BigQuery datasets, and Pub/Sub topics. 
+ - Exporting logs to Cloud Storage makes sense for storing logs for more than 30 days, but why should you export to BigQuery or Pub/Sub
+ - Exporting logs to BigQuery allows you to analyze logs and even visualize them in Data Studio. 
+   - BigQuery runs extremely fast SQL queries on gigabytes to petabytes of data.
+   - This allows you to analyze logs, such as your network traffic, 
+   - so that you can better understand traffic growth to forecast capacity, network usage to optimize network traffic expenses, or network forensics to analyze incidents
+ - want to visualize your logs, I recommend connecting your BigQuery tables to Data Studio
+   - Data Studio transforms your raw data into the metrics and dimensions that you can use to create easy-to-understand reports and dashboards.
+ - you can also export logs to Cloud Pub/Sub. This enables you to stream logs to applications or endpoints.
+ - Similar to the Cloud Monitoring agent, it’s a best practice to install the Logging agent on all your VM instances.
+   - The Logging agent can be installed with these two simple commands, which you could include in your startup script
+   - This agent is supported for Compute Engine and EC2 instances.
+
+_ **Error Reporting** _
+ 
+ - Error Reporting counts, analyzes, and aggregates the errors in your running cloud services
+ - A centralized error management interface displays the results with sorting and filtering capabilities, 
+   - and you can even set up real-time notifications when new errors are detected.
+ - In terms of programming languages, the exception stack trace parser is able to process Go, Java, .NET, Node.js, PHP, Python, and Ruby. 
+
+_ **Tracing** _
+
+ - Cloud Trace is a distributed tracing system that collects latency data from your applications and displays it in the Cloud Console
+ - You can track how requests propagate through your application and receive detailed near real-time performance insights.
+ - Cloud Trace automatically analyzes all of your application's traces to generate in-depth latency reports 
+   - that surface performance degradations and can capture traces from App Engine, HTTP(S) load balancers, and applications instrumented with the Cloud Trace API.
+ - Managing the amount of time it takes for your application to handle incoming requests and perform operations is an important part of managing overall application performance
+ - Cloud Trace is actually based on the tools used at Google to keep our services running at extreme scale
+
+_ **Debugging** _
+ 
+ - Cloud Debugger is a feature of Google Cloud that lets you inspect the state of a running application, in real time, without stopping or slowing it
+ - Specifically, the debugger adds less than 10ms to the request latency when the application state is captured. 
+   - In most cases, this is not noticeable by users
+ - These features allow you to understand the behavior of your code in production and analyze its state to locate those hard-to-find bugs
+ - With just a few mouse clicks, you can take a snapshot of your running application’s state or inject a new logging statement
+ - Cloud Debugger supports multiple languages, including Java, Python, Go, Node.js and Ruby.
